@@ -8,15 +8,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
-
     <div class="container">
         <header>
             <h1>الترجمة الذكية للمستندات</h1>
-            <p>ترجم ملفاتك بدقة فائقة مع الحفاظ الكامل على التنسيق الأصلي.</p>
+            <p>ترجم ملفاتك بدقة فائقة مع الحفاظ على النص الأصلي.</p>
         </header>
-
         <main>
-            <!-- منطقة رفع الملفات -->
             <div class="upload-area" id="upload-area">
                 <form id="upload-form">
                     <input type="file" id="file-input" name="file" accept=".doc,.docx" hidden>
@@ -27,26 +24,19 @@
                     <button type="submit" class="translate-btn" id="translate-btn">ترجمة الآن</button>
                 </form>
             </div>
-
-            <!-- منطقة عرض حالة الترجمة -->
             <div class="status-area" id="status-area" style="display: none;">
-                <div class="loader" id="loader"></div>
-                <p id="status-text">جاري رفع الملف وترجمته... قد يستغرق الأمر بعض الوقت.</p>
+                <div class="loader"></div>
+                <p id="status-text">جاري رفع الملف وترجمته...</p>
             </div>
-
-            <!-- منطقة عرض النتائج (هذا هو الجزء الجديد) -->
             <div class="result-area" id="result-area" style="display: none;">
                 <h2>النص المترجم:</h2>
-                <textarea id="translated-text" rows="10" readonly></textarea>
-                <button id="copy-btn" class="copy-btn">نسخ النص</button>
+                <textarea id="translated-text" readonly></textarea>
             </div>
         </main>
-
         <footer>
-            <p>&copy; 2025 - تم التطوير بواسطة الذكاء الاصطناعي</p>
+            <p>&copy; 2025 - ترجمة بواسطة الذكاء الاصطناعي</p>
         </footer>
     </div>
-
     <script src="script.js"></script>
 </body>
 </html>
