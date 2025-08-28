@@ -1,42 +1,104 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ترجمة احترافية للمستندات</title>
+    <title>AMC Professional Translation | ترجمة احترافية</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>الترجمة الذكية للمستندات</h1>
-            <p>ترجم ملفاتك بدقة فائقة مع الحفاظ على النص الأصلي.</p>
+
+    <div class="main-container">
+        <header class="app-header">
+            <img src="https://i.ibb.co/KcryvRrw/AMC-LOGO-01.png" alt="AMC Logo" class="logo">
+            <div class="header-text">
+                <h1>AMC SmartTranslate</h1>
+                <p>Your Partner in Global Business Development | شريكك لتطوير الأعمال عالمياً</p>
+            </div>
         </header>
-        <main>
-            <div class="upload-area" id="upload-area">
-                <form id="upload-form">
-                    <input type="file" id="file-input" name="file" accept=".doc,.docx" hidden>
-                    <label for="file-input" class="upload-label">
-                        <img src="https://img.icons8.com/color/96/000000/microsoft-word-2019--v2.png" alt="Upload Icon" class="upload-icon">
-                        <span id="file-name">انقر هنا لاختيار ملف وورد</span>
-                    </label>
-                    <button type="submit" class="translate-btn" id="translate-btn">ترجمة الآن</button>
+
+        <main class="app-main">
+            <!-- Tabs Navigation -->
+            <div class="tabs">
+                <button class="tab-link active" onclick="openTab(event, 'file-translation')">
+                    <span class="en">File Translation</span> / <span class="ar">ترجمة الملفات</span>
+                </button>
+                <button class="tab-link" onclick="openTab(event, 'text-translation')">
+                    <span class="en">Live Text Translation</span> / <span class="ar">ترجمة نصية فورية</span>
+                </button>
+            </div>
+
+            <!-- File Translation Tab -->
+            <div id="file-translation" class="tab-content active">
+                <form id="file-upload-form">
+                    <div class="language-selectors">
+                        <div class="lang-box">
+                            <label for="file-source-lang"><span class="en">From</span> / <span class="ar">من</span></label>
+                            <select id="file-source-lang" name="source_lang"></select>
+                        </div>
+                        <div class="lang-box">
+                            <label for="file-target-lang"><span class="en">To</span> / <span class="ar">إلى</span></label>
+                            <select id="file-target-lang" name="target_lang"></select>
+                        </div>
+                    </div>
+
+                    <div class="upload-area" id="upload-area">
+                        <input type="file" id="file-input" name="file" accept=".docx,.pdf,.png,.jpg,.jpeg" hidden>
+                        <label for="file-input" class="upload-label">
+                            <img src="https://api.iconify.design/material-symbols/upload-file-outline-rounded.svg?color=%2300653e" alt="Upload Icon" class="upload-icon">
+                            <span id="file-name-display"><span class="en">Click to select a file</span><br><span class="ar">(.docx, .pdf, .png, .jpg)</span></span>
+                        </label>
+                    </div>
+                    <button type="submit" class="action-btn" id="translate-file-btn">
+                        <span class="en">Translate File</span> / <span class="ar">ترجم الملف</span>
+                    </button>
                 </form>
             </div>
-            <div class="status-area" id="status-area" style="display: none;">
-                <div class="loader"></div>
-                <p id="status-text">جاري رفع الملف وترجمته...</p>
+
+            <!-- Live Text Translation Tab -->
+            <div id="text-translation" class="tab-content">
+                <div class="language-selectors">
+                    <div class="lang-box">
+                        <label for="text-source-lang"><span class="en">From</span> / <span class="ar">من</span></label>
+                        <select id="text-source-lang"></select>
+                    </div>
+                    <div class="lang-box">
+                        <label for="text-target-lang"><span class="en">To</span> / <span class="ar">إلى</span></label>
+                        <select id="text-target-lang"></select>
+                    </div>
+                </div>
+                <div class="text-areas">
+                    <textarea id="source-text" placeholder="Enter text here... / أدخل النص هنا..."></textarea>
+                    <textarea id="target-text" placeholder="Translation will appear here... / ستظهر الترجمة هنا..." readonly></textarea>
+                </div>
+                 <button class="action-btn" id="translate-text-btn">
+                    <span class="en">Translate Text</span> / <span class="ar">ترجم النص</span>
+                </button>
             </div>
-            <div class="result-area" id="result-area" style="display: none;">
-                <h2>النص المترجم:</h2>
-                <textarea id="translated-text" readonly></textarea>
+            
+            <!-- Universal Status/Result Area -->
+            <div class="status-container" id="status-container" style="display: none;">
+                 <div class="loader" id="loader"></div>
+                 <p id="status-text"></p>
             </div>
+             <div class="result-container" id="result-container" style="display: none;">
+                <h3><span class="en">Translation Result</span> / <span class="ar">نتيجة الترجمة</span></h3>
+                <textarea id="final-result-text" readonly></textarea>
+                <button id="copy-btn" class="action-btn secondary-btn">
+                    <span class="en">Copy Text</span> / <span class="ar">نسخ النص</span>
+                </button>
+            </div>
+
         </main>
-        <footer>
-            <p>&copy; 2025 - ترجمة بواسطة الذكاء الاصطناعي</p>
+
+        <footer class="app-footer">
+            <p><span class="en">This tool was developed by <strong>AMC Marketing Team</strong></span> | <span class="ar">تم تطوير هذه الأداة بواسطة <strong>فريق التسويق لشركة الأهلي الطبية</strong></span></p>
         </footer>
     </div>
+
     <script src="script.js"></script>
 </body>
 </html>
