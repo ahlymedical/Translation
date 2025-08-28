@@ -5,79 +5,59 @@ document.addEventListener('DOMContentLoaded', () => {
     const uploadArea = document.getElementById('upload-area');
     const statusArea = document.getElementById('status-area');
     const statusText = document.getElementById('status-text');
-    
-    // العناصر الجديدة التي تم إصلاحها
     const resultArea = document.getElementById('result-area');
     const translatedTextArea = document.getElementById('translated-text');
-    const copyBtn = document.getElementById('copy-btn');
 
-    // !! هام: بعد النشر الناجح، استبدل هذا الرابط بالرابط الجديد من Cloud Run
-    const CLOUD_RUN_URL = 'https://YOUR_NEW_CLOUD_RUN_URL_HERE/translate';
+    // !!!!!! هام جداً: استبدل هذا الرابط بالرابط الخاص بك وأضف /translate في النهاية
+    const CLOUD_RUN_URL = 'https://translation-929510129831.europe-west1.run.app/translate';
 
-    // تحديث اسم الملف عند اختياره
     fileInput.addEventListener('change', () => {
-        if (fileInput.files.length > 0) {
-            fileNameDisplay.textContent = fileInput.files[0].name;
-        } else {
-            fileNameDisplay.textContent = 'انقر هنا لاختيار ملف وورد';
-        }
+        fileNameDisplay.textContent = fileInput.files.length > 0 ? fileInput.files[0].name : 'انقر هنا لاختيار ملف وورد';
     });
 
-    // معالجة عملية الإرسال
     uploadForm.addEventListener('submit', async (event) => {
         event.preventDefault();
-
         if (fileInput.files.length === 0) {
             alert('الرجاء اختيار ملف أولاً.');
             return;
         }
 
         const file = fileInput.files[0];
+        if (!file.name.endsWith('.docx')) {
+             alert('الرجاء رفع ملف بصيغة .docx فقط.');
+             return;
+        }
+        
         const formData = new FormData();
         formData.append('file', file);
 
-        // تحديث الواجهة: إخفاء منطقة الرفع والنتائج، وإظهار التحميل
         uploadArea.style.display = 'none';
         resultArea.style.display = 'none';
         statusArea.style.display = 'block';
         statusText.textContent = 'جاري رفع الملف وترجمته...';
-        copyBtn.textContent = 'نسخ النص';
 
         try {
             const response = await fetch(CLOUD_RUN_URL, {
                 method: 'POST',
                 body: formData,
             });
-
             const data = await response.json();
-
             if (!response.ok) {
-                // عرض رسالة الخطأ من الخادم إذا كانت موجودة
-                throw new Error(data.error || 'حدث خطأ غير متوقع في الخادم.');
+                throw new Error(data.error || 'حدث خطأ غير متوقع.');
             }
             
-            // عرض النتائج بنجاح
             statusArea.style.display = 'none';
             translatedTextArea.value = data.translated_text;
             resultArea.style.display = 'block';
-            uploadArea.style.display = 'block'; // السماح برفع ملف آخر
-
+            
         } catch (error) {
             console.error('Error:', error);
             statusText.textContent = `فشل: ${error.message}`;
-            
-            // إظهار منطقة الرفع مرة أخرى بعد 5 ثوانٍ للسماح بالمحاولة مرة أخرى
-            setTimeout(() => {
-                uploadArea.style.display = 'block';
-                statusArea.style.display = 'none';
-            }, 5000);
+        } finally {
+            // اسمح للمستخدم برفع ملف آخر بغض النظر عن النتيجة
+            uploadArea.style.display = 'block';
+            fileInput.value = ''; // إعادة تعيين حقل الإدخال
+            fileNameDisplay.textContent = 'انقر هنا لاختيار ملف وورد';
         }
-    });
-
-    // وظيفة زر النسخ
-    copyBtn.addEventListener('click', () => {
-        translatedTextArea.select();
-        document.execCommand('copy');
-        copyBtn.textContent = 'تم النسخ!';
     });
 });
