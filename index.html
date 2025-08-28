@@ -16,6 +16,7 @@
         </header>
 
         <main>
+            <!-- منطقة رفع الملفات -->
             <div class="upload-area" id="upload-area">
                 <form id="upload-form">
                     <input type="file" id="file-input" name="file" accept=".doc,.docx" hidden>
@@ -27,10 +28,17 @@
                 </form>
             </div>
 
+            <!-- منطقة عرض حالة الترجمة -->
             <div class="status-area" id="status-area" style="display: none;">
                 <div class="loader" id="loader"></div>
                 <p id="status-text">جاري رفع الملف وترجمته... قد يستغرق الأمر بعض الوقت.</p>
-                <a href="#" id="download-link" class="download-btn" style="display: none;" download>تحميل الملف المترجم</a>
+            </div>
+
+            <!-- منطقة عرض النتائج (هذا هو الجزء الجديد) -->
+            <div class="result-area" id="result-area" style="display: none;">
+                <h2>النص المترجم:</h2>
+                <textarea id="translated-text" rows="10" readonly></textarea>
+                <button id="copy-btn" class="copy-btn">نسخ النص</button>
             </div>
         </main>
 
