@@ -1,220 +1,172 @@
-:root {
-    --amc-dark-green: #00653e;
-    --amc-green: #49763a;
-    --amc-light-green: #59a93a;
-    --amc-orange: #e15423;
-    --amc-yellow: #f7b227;
-    --background-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-    --card-background: rgba(255, 255, 255, 0.9);
-    --text-primary: #1d2d35;
-    --text-secondary: #5a6872;
-    --border-color: #dce3e9;
-    --font-en: 'Poppins', sans-serif;
-    --font-ar: 'Cairo', sans-serif;
-    --shadow: 0 10px 35px rgba(0, 0, 0, 0.08);
-}
+document.addEventListener('DOMContentLoaded', () => {
+    // --- URLs and Elements ---
+    const BASE_URL = 'https://translation-929510129831.europe-west1.run.app';
+    const FILE_TRANSLATE_URL = `${BASE_URL}/translate-file`;
+    const TEXT_TRANSLATE_URL = `${BASE_URL}/translate-text`;
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
+    const fileForm = document.getElementById('file-upload-form');
+    const fileInput = document.getElementById('file-input');
+    const fileNameDisplay = document.getElementById('file-name-display');
+    const uploadArea = document.getElementById('upload-area');
+    const fileStatusContainer = document.getElementById('file-status-container');
+    const translateFileBtn = document.getElementById('translate-file-btn');
+    
+    const sourceTextArea = document.getElementById('source-text');
+    const targetTextArea = document.getElementById('target-text');
+    const copyBtn = document.getElementById('copy-btn');
 
-body {
-    font-family: var(--font-en);
-    background-image: var(--background-gradient);
-    color: var(--text-primary);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    padding: 2rem;
-}
+    const languages = {
+        'Arabic': 'ar', 'English': 'en', 'Spanish': 'es', 'French': 'fr', 'German': 'de',
+        'Italian': 'it', 'Japanese': 'ja', 'Korean': 'ko', 'Chinese': 'zh',
+        'Russian': 'ru', 'Portuguese': 'pt', 'Hindi': 'hi', 'Turkish': 'tr'
+    };
+    
+    // --- Functions ---
+    function populateLanguageSelectors() {
+        const selectors = document.querySelectorAll('select');
+        selectors.forEach(selector => {
+            if (selector.id.includes('source')) {
+                 selector.innerHTML = '<option value="auto">Auto-Detect / كشف تلقائي</option>';
+            } else {
+                 selector.innerHTML = '';
+            }
+            for (const name of Object.keys(languages)) {
+                selector.add(new Option(name, name));
+            }
+        });
+        document.getElementById('file-target-lang').value = 'Arabic';
+        document.getElementById('text-target-lang').value = 'Arabic';
+    }
 
-.en { font-family: var(--font-en); }
-.ar { font-family: var(--font-ar); }
+    function showFileStatus(message, isError = false) {
+        fileStatusContainer.style.display = 'block';
+        fileStatusContainer.textContent = message;
+        fileStatusContainer.style.color = isError ? '#d93025' : 'var(--text-secondary)';
+        fileStatusContainer.style.backgroundColor = isError ? '#fce8e6' : '#eef2f5';
+    }
 
-.page-container {
-    width: 100%;
-    max-width: 850px;
-}
+    function hideFileStatus() {
+        fileStatusContainer.style.display = 'none';
+    }
 
-.app-header {
-    background-color: white;
-    padding: 15px;
-    border-radius: 16px;
-    box-shadow: var(--shadow);
-    margin-bottom: 25px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
+    async function handleFileSubmit(e) {
+        e.preventDefault();
+        if (fileInput.files.length === 0) {
+            showFileStatus('Please select a file first. / الرجاء اختيار ملف أولاً.', true);
+            return;
+        }
 
-.logo { height: 50px; width: auto; }
+        const formData = new FormData(fileForm);
+        showFileStatus('Processing... This may take a moment for large files. / جاري المعالجة...');
+        translateFileBtn.disabled = true;
 
-.app-main {
-    background: var(--card-background);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 16px;
-    box-shadow: var(--shadow);
-    padding: 35px;
-}
+        try {
+            const response = await fetch(FILE_TRANSLATE_URL, { method: 'POST', body: formData });
 
-.title-container {
-    text-align: center;
-    margin-bottom: 30px;
-}
-.title-container h1 { font-size: 2rem; font-weight: 700; }
-.title-container p { font-size: 1.1rem; color: var(--text-secondary); }
-.title-container .ar { display: block; font-size: 1.5rem; color: var(--amc-green); }
+            if (!response.ok) {
+                // نحاول قراءة الخطأ من الـ JSON الذي أرسلناه من الخلفية
+                const errorData = await response.json();
+                throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+            }
 
-.tabs {
-    display: flex;
-    justify-content: center;
-    background-color: #eef2f5;
-    border-radius: 12px;
-    padding: 5px;
-    margin-bottom: 30px;
-}
+            // التعامل مع تحميل الملف
+            const blob = await response.blob();
+            const downloadUrl = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = downloadUrl;
+            const contentDisposition = response.headers.get('content-disposition');
+            let filename = 'translated_document.docx';
+            if (contentDisposition) {
+                const filenameMatch = contentDisposition.match(/filename="(.+)"/);
+                if (filenameMatch.length > 1) {
+                    filename = filenameMatch[1];
+                }
+            }
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(downloadUrl);
+            
+            showFileStatus('Translation complete and download started! / اكتملت الترجمة وبدأ التحميل!');
 
-.tab-link {
-    flex: 1;
-    padding: 12px 15px;
-    cursor: pointer;
-    border: none;
-    background-color: transparent;
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--text-secondary);
-    border-radius: 8px;
-    transition: all 0.3s ease;
-}
+        } catch (error) {
+            console.error('File Translation Error:', error);
+            showFileStatus(error.message, true);
+        } finally {
+            translateFileBtn.disabled = false;
+        }
+    }
 
-.tab-link.active {
-    background-color: white;
-    color: var(--amc-orange);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
+    async function handleTextTranslation() {
+        const text = sourceTextArea.value.trim();
+        if (!text) return;
+        targetTextArea.placeholder = "Translating... / جاري الترجمة...";
+        try {
+            const response = await fetch(TEXT_TRANSLATE_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    text: text,
+                    target_lang: document.getElementById('text-target-lang').value
+                })
+            });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error);
+            targetTextArea.value = data.translated_text;
+        } catch (error) {
+            targetTextArea.value = `Error: ${error.message}`;
+        }
+    }
 
-.tab-content { display: none; }
-.tab-content.active { display: block; animation: fadeIn 0.5s; }
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    // --- Event Listeners ---
+    fileInput.addEventListener('change', () => {
+        if (fileInput.files.length > 0) {
+            fileNameDisplay.querySelector('.en b').textContent = fileInput.files[0].name;
+            fileNameDisplay.querySelector('.ar b').textContent = '';
+            hideFileStatus();
+        }
+    });
+    
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        uploadArea.addEventListener(eventName, e => {
+            e.preventDefault();
+            e.stopPropagation();
+        }, false);
+    });
+    ['dragenter', 'dragover'].forEach(eventName => {
+        uploadArea.addEventListener(eventName, () => uploadArea.classList.add('dragover'), false);
+    });
+    ['dragleave', 'drop'].forEach(eventName => {
+        uploadArea.addEventListener(eventName, () => uploadArea.classList.remove('dragover'), false);
+    });
+    uploadArea.addEventListener('drop', e => {
+        fileInput.files = e.dataTransfer.files;
+        fileInput.dispatchEvent(new Event('change'));
+    }, false);
 
-.language-selectors {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    margin-bottom: 20px;
-}
-.language-selectors select {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    font-size: 1rem;
-    background-color: #fff;
-    cursor: pointer;
-    -webkit-appearance: none;
-    appearance: none;
-    background-image: url('https://api.iconify.design/mdi/chevron-down.svg?color=%235a6872');
-    background-repeat: no-repeat;
-    background-position: right 12px center;
-    background-size: 24px;
-}
-.lang-arrow { width: 24px; height: 24px; flex-shrink: 0; }
+    fileForm.addEventListener('submit', handleFileSubmit);
+    
+    let debounceTimer;
+    sourceTextArea.addEventListener('input', () => {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(handleTextTranslation, 800);
+    });
 
-.upload-area {
-    border: 2px dashed var(--border-color);
-    border-radius: 12px;
-    padding: 30px;
-    text-align: center;
-    background-color: #fcfdff;
-    transition: all 0.3s ease;
-    margin-bottom: 20px;
-}
-.upload-area.dragover {
-    border-color: var(--amc-orange);
-    background-color: #fff8f5;
-    transform: scale(1.02);
-}
-.upload-label { cursor: pointer; }
-.upload-icon { width: 48px; height: 48px; margin-bottom: 15px; }
-#file-name-display span { display: block; }
-#file-name-display b { color: var(--amc-dark-green); }
-#file-name-display small { color: var(--text-secondary); font-size: 0.9rem; margin-top: 5px; }
+    copyBtn.addEventListener('click', () => {
+        navigator.clipboard.writeText(targetTextArea.value).then(() => {
+            copyBtn.title = 'Copied!';
+            setTimeout(() => { copyBtn.title = 'Copy text'; }, 2000);
+        });
+    });
 
-.status-container {
-    text-align: center;
-    padding: 15px;
-    border-radius: 8px;
-    background-color: #eef2f5;
-    margin-bottom: 20px;
-    font-weight: 600;
-}
+    // --- Initialization ---
+    populateLanguageSelectors();
+});
 
-.action-btn {
-    width: 100%;
-    background: var(--amc-orange);
-    color: white;
-    border: none;
-    padding: 15px;
-    border-radius: 10px;
-    font-size: 1.1rem;
-    font-weight: 700;
-    font-family: var(--font-ar);
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(225, 84, 35, 0.3);
-}
-.action-btn:hover {
-    background-color: #d04a1a;
-    transform: translateY(-3px);
-    box-shadow: 0 6px 20px rgba(225, 84, 35, 0.4);
-}
-.action-btn:disabled {
-    background-color: #fbd2c2;
-    cursor: not-allowed;
-    box-shadow: none;
-    transform: none;
-}
-
-.text-areas { display: flex; gap: 20px; }
-.text-areas textarea {
-    flex: 1;
-    height: 220px;
-    padding: 15px;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    font-size: 1rem;
-    resize: none;
-}
-.target-text-container { position: relative; flex: 1; }
-#copy-btn {
-    position: absolute;
-    bottom: 10px;
-    right: 10px;
-    background: var(--amc-green);
-    border: none;
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    cursor: pointer;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: background-color 0.3s;
-}
-#copy-btn:hover { background: var(--amc-dark-green); }
-#copy-btn img { width: 20px; height: 20px; }
-
-.app-footer {
-    text-align: center;
-    margin-top: 25px;
-    padding-top: 25px;
-    border-top: 1px solid var(--border-color);
-    font-size: 0.9rem;
-    color: var(--text-secondary);
-}
-
-@media (max-width: 768px) {
-    body { padding: 1rem; }
-    .app-main { padding: 20px; }
-    .text-areas { flex-direction: column; }
+function openTab(evt, tabName) {
+    document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+    document.querySelectorAll('.tab-link').forEach(tl => tl.classList.remove('active'));
+    document.getElementById(tabName).classList.add('active');
+    evt.currentTarget.classList.add('active');
 }
