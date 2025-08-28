@@ -1,29 +1,34 @@
 import os
 import google.generativeai as genai
 import docx
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 
 # --- الإعدادات ---
-# 1. إنشاء تطبيق فلاسك
-app = Flask(__name__)
+# 1. إنشاء تطبيق فلاسك وتحديد مجلد الملفات الثابتة
+# static_folder='.' يعني أن ملفات مثل index.html موجودة في نفس المجلد الرئيسي
+app = Flask(__name__, static_folder='.', static_url_path='')
 
-# 2. السماح للطلبات من أي مصدر (ضروري لربط الواجهة الأمامية بالخلفية)
+# 2. السماح للطلبات من أي مصدر
 CORS(app)
 
-# 3. إعداد Gemini API باستخدام المفتاح الذي وضعته في Google Cloud
-# تأكد من أن اسم المتغير في Google Cloud هو GEMINI_API_KEY
+# 3. إعداد Gemini API
+model = None
+api_key_error = None
 try:
     GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY')
     if not GEMINI_API_KEY:
-        raise ValueError("لم يتم العثور على مفتاح GEMINI_API_KEY")
+        api_key_error = "لم يتم العثور على متغير البيئة GEMINI_API_KEY"
+        raise ValueError(api_key_error)
     
     genai.configure(api_key=GEMINI_API_KEY)
     model = genai.GenerativeModel('gemini-1.5-flash')
     print("تم إعداد Gemini API بنجاح.")
 except Exception as e:
+    # طباعة الخطأ في سجلات الخادم للمساعدة في التشخيص
     print(f"!!!!!! خطأ فادح في إعداد Gemini API: {e}")
-    model = None
+    if not api_key_error:
+        api_key_error = str(e)
 
 # --- الدوال المساعدة ---
 def read_text_from_docx(file_stream):
@@ -38,16 +43,17 @@ def read_text_from_docx(file_stream):
 
 # --- نقاط الدخول (Routes) ---
 
-# نقطة دخول أساسية للتأكد من أن الخادم يعمل
+# **التعديل الرئيسي**: هذا المسار يقوم بعرض الواجهة الرسومية
 @app.route('/')
-def health_check():
-    return "<h1>الخادم يعمل بنجاح!</h1>"
+def serve_index():
+    """يعرض ملف index.html الرئيسي."""
+    return send_from_directory('.', 'index.html')
 
-# نقطة الدخول الخاصة بالترجمة
+# نقطة الدخول الخاصة بالترجمة (تبقى كما هي)
 @app.route('/translate', methods=['POST'])
 def translate_document():
     if not model:
-        return jsonify({"error": "Gemini API غير مُهيأ بشكل صحيح على الخادم."}), 500
+        return jsonify({"error": f"Gemini API غير مُهيأ بشكل صحيح على الخادم: {api_key_error}"}), 500
 
     if 'file' not in request.files:
         return jsonify({"error": "لا يوجد ملف في الطلب"}), 400
@@ -80,7 +86,7 @@ def translate_document():
         print(f"!!!!!! حدث خطأ أثناء عملية الترجمة: {e}")
         return jsonify({"error": f"حدث خطأ داخلي في الخادم: {e}"}), 500
 
-# هذا الجزء للتشغيل المحلي فقط، gunicorn سيهتم بالباقي على الخادم
+# هذا الجزء للتشغيل المحلي فقط
 if __name__ == "__main__":
     port = int(os.environ.get('PORT', 8080))
     app.run(debug=True, host='0.0.0.0', port=port)
