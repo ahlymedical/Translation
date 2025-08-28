@@ -4,13 +4,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const fileNameDisplay = document.getElementById('file-name');
     const uploadArea = document.getElementById('upload-area');
     const statusArea = document.getElementById('status-area');
-    const loader = document.getElementById('loader');
     const statusText = document.getElementById('status-text');
-    const downloadLink = document.getElementById('download-link');
-    const translateBtn = document.getElementById('translate-btn');
+    
+    // العناصر الجديدة
+    const resultArea = document.getElementById('result-area');
+    const translatedTextArea = document.getElementById('translated-text');
 
-    // رابط الدالة السحابية التي أنشأتها على Google Cloud
-    const CLOUD_FUNCTION_URL = 'YOUR_GOOGLE_CLOUD_FUNCTION_URL'; // !! هام: استبدل هذا الرابط
+    // !! هام جداً: ضع رابط الخدمة الخاص بك هنا وأضف /translate في النهاية
+    const CLOUD_RUN_URL = 'https://translation-929510129831.europe-west1.run.app/translate';
 
     fileInput.addEventListener('change', () => {
         if (fileInput.files.length > 0) {
@@ -32,48 +33,40 @@ document.addEventListener('DOMContentLoaded', () => {
         const formData = new FormData();
         formData.append('file', file);
 
-        // إظهار حالة التحميل وإخفاء منطقة الرفع
+        // إخفاء وإظهار العناصر المناسبة
         uploadArea.style.display = 'none';
+        resultArea.style.display = 'none';
         statusArea.style.display = 'block';
-        loader.style.display = 'block';
-        downloadLink.style.display = 'none';
         statusText.textContent = 'جاري رفع الملف وترجمته...';
 
         try {
-            const response = await fetch(CLOUD_FUNCTION_URL, {
+            const response = await fetch(CLOUD_RUN_URL, {
                 method: 'POST',
                 body: formData,
             });
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'حدث خطأ غير متوقع.');
-            }
+            const data = await response.json();
 
-            // استلام الملف المترجم كـ blob
-            const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
+            if (!response.ok) {
+                throw new Error(data.error || 'حدث خطأ غير متوقع.');
+            }
             
-            // إعداد رابط التحميل
-            loader.style.display = 'none';
-            statusText.textContent = 'تمت الترجمة بنجاح!';
-            downloadLink.href = url;
-            downloadLink.download = `translated-${file.name}`; // اسم الملف الجديد
-            downloadLink.style.display = 'block';
+            // عرض النتائج
+            statusArea.style.display = 'none';
+            translatedTextArea.value = data.translated_text;
+            resultArea.style.display = 'block';
+            uploadArea.style.display = 'block'; // السماح برفع ملف آخر
+
 
         } catch (error) {
             console.error('Error:', error);
             statusText.textContent = `فشل: ${error.message}`;
-            loader.style.display = 'none';
+            
             // إتاحة الفرصة للمستخدم للمحاولة مرة أخرى
             setTimeout(() => {
                 uploadArea.style.display = 'block';
                 statusArea.style.display = 'none';
-            }, 4000);
+            }, 5000);
         }
     });
 });
-<div class="result-area" id="result-area" style="display: none;">
-    <h2>النص المترجم:</h2>
-    <textarea id="translated-text" readonly></textarea>
-</div>
