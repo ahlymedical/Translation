@@ -8,9 +8,7 @@ body {
     min-height: 100vh;
     margin: 0;
     padding: 20px;
-    box-sizing: border-box;
 }
-
 .container {
     background-color: #ffffff;
     padding: 40px;
@@ -20,30 +18,21 @@ body {
     max-width: 600px;
     text-align: center;
 }
-
 header h1 {
     color: #1a73e8;
     margin-bottom: 10px;
 }
-
 header p {
     color: #5f6368;
     font-size: 1.1em;
     margin-bottom: 30px;
 }
-
 .upload-area {
     border: 3px dashed #d0d0d0;
     border-radius: 10px;
     padding: 30px;
     transition: border-color 0.3s, background-color 0.3s;
 }
-
-.upload-area.dragover {
-    border-color: #1a73e8;
-    background-color: #e8f0fe;
-}
-
 .upload-label {
     cursor: pointer;
     display: flex;
@@ -51,18 +40,15 @@ header p {
     align-items: center;
     justify-content: center;
 }
-
 .upload-icon {
     width: 80px;
     height: 80px;
     margin-bottom: 15px;
 }
-
 #file-name {
     font-weight: bold;
     color: #555;
 }
-
 .translate-btn {
     background-color: #1a73e8;
     color: white;
@@ -75,16 +61,11 @@ header p {
     margin-top: 25px;
     transition: background-color 0.3s, box-shadow 0.3s;
 }
-
 .translate-btn:hover {
     background-color: #155ab6;
     box-shadow: 0 4px 15px rgba(26, 115, 232, 0.4);
 }
-
-.status-area {
-    padding: 20px;
-}
-
+.status-area { padding: 20px; }
 .loader {
     border: 6px solid #f3f3f3;
     border-top: 6px solid #1a73e8;
@@ -94,32 +75,26 @@ header p {
     animation: spin 1s linear infinite;
     margin: 0 auto 20px auto;
 }
-
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
-
 #status-text {
     font-size: 1.1em;
     color: #5f6368;
 }
-
-/* --- التنسيقات الجديدة --- */
 .result-area {
     margin-top: 30px;
     text-align: right;
 }
-
 .result-area h2 {
-    color: #1a73e8;
-    margin-bottom: 15px;
-    text-align: center;
+    margin-bottom: 10px;
+    color: #333;
 }
-
 .result-area textarea {
     width: 100%;
     box-sizing: border-box;
+    height: 250px;
     border: 1px solid #ddd;
     border-radius: 8px;
     padding: 15px;
@@ -127,27 +102,7 @@ header p {
     line-height: 1.6;
     background-color: #f8f9fa;
     resize: vertical;
-    min-height: 150px;
 }
-
-.copy-btn {
-    background-color: #34a853;
-    color: white;
-    border: none;
-    padding: 10px 25px;
-    border-radius: 8px;
-    font-size: 1em;
-    font-weight: bold;
-    cursor: pointer;
-    margin-top: 15px;
-    transition: background-color 0.3s;
-}
-
-.copy-btn:hover {
-    background-color: #2c8e45;
-}
-
-
 footer {
     margin-top: 30px;
     color: #888;
