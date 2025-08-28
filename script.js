@@ -1,166 +1,166 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- URLs and Elements ---
-    const BASE_URL = 'https://translation-929510129831.europe-west1.run.app'; // استخدم الرابط الأساسي هنا
-    const FILE_TRANSLATE_URL = `${BASE_URL}/translate-file`;
-    const TEXT_TRANSLATE_URL = `${BASE_URL}/translate-text`;
+    // **الإصلاح الرئيسي**: استخدام مسارات نسبية بدلاً من رابط ثابت
+    const FILE_TRANSLATE_URL = '/translate-file';
+    const TEXT_TRANSLATE_URL = '/translate-text';
 
     const fileForm = document.getElementById('file-upload-form');
     const fileInput = document.getElementById('file-input');
     const fileNameDisplay = document.getElementById('file-name-display');
-    const fileSourceLang = document.getElementById('file-source-lang');
-    const fileTargetLang = document.getElementById('file-target-lang');
-
+    const uploadArea = document.getElementById('upload-area');
+    const fileStatusContainer = document.getElementById('file-status-container');
+    const translateFileBtn = document.getElementById('translate-file-btn');
+    
     const sourceTextArea = document.getElementById('source-text');
     const targetTextArea = document.getElementById('target-text');
-    const textSourceLang = document.getElementById('text-source-lang');
-    const textTargetLang = document.getElementById('text-target-lang');
-    const translateTextBtn = document.getElementById('translate-text-btn');
-
-    const statusContainer = document.getElementById('status-container');
-    const statusText = document.getElementById('status-text');
-    const resultContainer = document.getElementById('result-container');
-    const finalResultText = document.getElementById('final-result-text');
     const copyBtn = document.getElementById('copy-btn');
 
-    // --- Language List ---
     const languages = {
         'Arabic': 'ar', 'English': 'en', 'Spanish': 'es', 'French': 'fr', 'German': 'de',
-        'Italian': 'it', 'Japanese': 'ja', 'Korean': 'ko', 'Chinese (Simplified)': 'zh-CN',
-        'Russian': 'ru', 'Portuguese': 'pt', 'Hindi': 'hi', 'Turkish': 'tr', 'Dutch': 'nl'
+        'Italian': 'it', 'Japanese': 'ja', 'Korean': 'ko', 'Chinese': 'zh',
+        'Russian': 'ru', 'Portuguese': 'pt', 'Hindi': 'hi', 'Turkish': 'tr'
     };
     
-    // --- Functions ---
     function populateLanguageSelectors() {
-        const selectors = [fileSourceLang, fileTargetLang, textSourceLang, textTargetLang];
+        const selectors = document.querySelectorAll('select');
         selectors.forEach(selector => {
-            // Add auto-detect for source languages
             if (selector.id.includes('source')) {
                  selector.innerHTML = '<option value="auto">Auto-Detect / كشف تلقائي</option>';
             } else {
                  selector.innerHTML = '';
             }
-
-            for (const [name, code] of Object.entries(languages)) {
-                const option = document.createElement('option');
-                option.value = name; // Send full name to backend
-                option.textContent = name;
-                selector.appendChild(option);
+            for (const name of Object.keys(languages)) {
+                selector.add(new Option(name, name));
             }
         });
-        // Set default target language
-        fileTargetLang.value = 'Arabic';
-        textTargetLang.value = 'Arabic';
+        document.getElementById('file-target-lang').value = 'Arabic';
+        document.getElementById('text-target-lang').value = 'Arabic';
     }
 
-    function showStatus(message) {
-        resultContainer.style.display = 'none';
-        statusContainer.style.display = 'block';
-        statusText.textContent = message;
+    function showFileStatus(message, isError = false) {
+        fileStatusContainer.style.display = 'block';
+        fileStatusContainer.textContent = message;
+        fileStatusContainer.style.color = isError ? '#d93025' : 'var(--text-secondary)';
+        fileStatusContainer.style.backgroundColor = isError ? '#fce8e6' : '#f1f5f9';
     }
 
-    function showResult(text) {
-        statusContainer.style.display = 'none';
-        resultContainer.style.display = 'block';
-        finalResultText.value = text;
-    }
-
-    function showError(message) {
-        statusContainer.style.display = 'block';
-        resultContainer.style.display = 'none';
-        statusText.innerHTML = `<span style="color: #e15423;">Error / خطأ: ${message}</span>`;
-    }
-    
-    // --- Event Listeners ---
-    fileInput.addEventListener('change', () => {
-        if (fileInput.files.length > 0) {
-            fileNameDisplay.textContent = fileInput.files[0].name;
-        }
-    });
-
-    fileForm.addEventListener('submit', async (e) => {
+    async function handleFileSubmit(e) {
         e.preventDefault();
         if (fileInput.files.length === 0) {
-            alert('Please select a file first. / الرجاء اختيار ملف أولاً.');
+            showFileStatus('Please select a file first. / الرجاء اختيار ملف أولاً.', true);
             return;
         }
 
-        const formData = new FormData();
-        formData.append('file', fileInput.files[0]);
-        formData.append('source_lang', fileSourceLang.value);
-        formData.append('target_lang', fileTargetLang.value);
-
-        showStatus('Uploading and translating file... / جاري رفع وترجمة الملف...');
+        const formData = new FormData(fileForm);
+        showFileStatus('Processing... This may take a moment for large files. / جاري المعالجة...');
+        translateFileBtn.disabled = true;
 
         try {
             const response = await fetch(FILE_TRANSLATE_URL, { method: 'POST', body: formData });
-            const data = await response.json();
-            if (!response.ok) throw new Error(data.error || 'Unknown server error.');
-            showResult(data.translated_text);
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+            }
+
+            const blob = await response.blob();
+            const downloadUrl = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = downloadUrl;
+            
+            const contentDisposition = response.headers.get('content-disposition');
+            let filename = 'translated_document.docx';
+            if (contentDisposition) {
+                const filenameMatch = contentDisposition.match(/filename="(.+)"/);
+                if (filenameMatch && filenameMatch.length > 1) {
+                    filename = filenameMatch[1];
+                }
+            }
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            
+            window.URL.revokeObjectURL(downloadUrl);
+            a.remove();
+            
+            showFileStatus('Translation complete! Download has started. / اكتملت الترجمة! بدأ التحميل.');
+
         } catch (error) {
             console.error('File Translation Error:', error);
-            showError(error.message);
+            showFileStatus(`Error: ${error.message}`, true);
+        } finally {
+            translateFileBtn.disabled = false;
         }
-    });
+    }
 
     async function handleTextTranslation() {
         const text = sourceTextArea.value.trim();
-        if (!text) return;
-
-        targetTextArea.value = "Translating... / جاري الترجمة...";
-
+        if (!text) {
+            targetTextArea.value = '';
+            return;
+        };
+        targetTextArea.placeholder = "Translating... / جاري الترجمة...";
         try {
             const response = await fetch(TEXT_TRANSLATE_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     text: text,
-                    source_lang: textSourceLang.value,
-                    target_lang: textTargetLang.value
+                    target_lang: document.getElementById('text-target-lang').value
                 })
             });
             const data = await response.json();
-            if (!response.ok) throw new Error(data.error || 'Unknown server error.');
+            if (!response.ok) throw new Error(data.error);
             targetTextArea.value = data.translated_text;
         } catch (error) {
-            console.error('Text Translation Error:', error);
             targetTextArea.value = `Error: ${error.message}`;
         }
     }
+
+    fileInput.addEventListener('change', () => {
+        if (fileInput.files.length > 0) {
+            fileNameDisplay.querySelector('.en b').textContent = fileInput.files[0].name;
+            fileNameDisplay.querySelector('.ar b').textContent = '';
+            fileStatusContainer.style.display = 'none';
+        }
+    });
     
-    translateTextBtn.addEventListener('click', handleTextTranslation);
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        uploadArea.addEventListener(eventName, e => { e.preventDefault(); e.stopPropagation(); });
+    });
+    ['dragenter', 'dragover'].forEach(eventName => {
+        uploadArea.addEventListener(eventName, () => uploadArea.classList.add('dragover'));
+    });
+    ['dragleave', 'drop'].forEach(eventName => {
+        uploadArea.addEventListener(eventName, () => uploadArea.classList.remove('dragover'));
+    });
+    uploadArea.addEventListener('drop', e => {
+        fileInput.files = e.dataTransfer.files;
+        fileInput.dispatchEvent(new Event('change'));
+    });
+
+    fileForm.addEventListener('submit', handleFileSubmit);
     
-    // Debounce for live translation
     let debounceTimer;
     sourceTextArea.addEventListener('input', () => {
         clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(() => {
-            handleTextTranslation();
-        }, 1000); // 1 second delay
+        debounceTimer = setTimeout(handleTextTranslation, 800);
     });
 
     copyBtn.addEventListener('click', () => {
-        finalResultText.select();
-        document.execCommand('copy');
-        alert('Translation copied to clipboard! / تم نسخ الترجمة!');
+        navigator.clipboard.writeText(targetTextArea.value).then(() => {
+            copyBtn.title = 'Copied!';
+            setTimeout(() => { copyBtn.title = 'Copy text'; }, 2000);
+        });
     });
 
-    // --- Initialization ---
     populateLanguageSelectors();
 });
 
-// --- Tab Switching Logic ---
 function openTab(evt, tabName) {
-    let i, tabcontent, tablinks;
-    tabcontent = document.getElementsByClassName("tab-content");
-    for (i = 0; i < tabcontent.length; i++) {
-        tabcontent[i].style.display = "none";
-        tabcontent[i].classList.remove("active");
-    }
-    tablinks = document.getElementsByClassName("tab-link");
-    for (i = 0; i < tablinks.length; i++) {
-        tablinks[i].classList.remove("active");
-    }
-    document.getElementById(tabName).style.display = "block";
-    document.getElementById(tabName).classList.add("active");
-    evt.currentTarget.classList.add("active");
+    document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+    document.querySelectorAll('.tab-link').forEach(tl => tl.classList.remove('active'));
+    document.getElementById(tabName).classList.add('active');
+    evt.currentTarget.classList.add('active');
 }
