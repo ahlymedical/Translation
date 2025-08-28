@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AMC SmartTranslate | ترجمة احترافية</title>
+    <title>AMC GlobalTranslate | الترجمة العالمية من الأهلي الطبية</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
@@ -11,26 +11,27 @@
 </head>
 <body>
 
-    <div class="page-container">
+    <div class="page-background"></div>
+
+    <div class="main-container">
         <header class="app-header">
-            <div class="logo-container">
-                <img src="https://i.ibb.co/KcryvRrw/AMC-LOGO-01.png" alt="AMC Logo" class="logo">
-            </div>
+            <img src="https://i.ibb.co/p91wYFv/AMC-LOGO-02.png" alt="AMC Logo" class="logo">
         </header>
 
         <main class="app-main">
             <div class="title-container">
-                <h1><span class="en">AMC SmartTranslate</span><span class="ar">الترجمة الذكية من الأهلي الطبية</span></h1>
-                <p><span class="en">Empowering Your Global Business Development</span><span class="ar">لتمكين تطوير أعمالك عالمياً</span></p>
+                <h1><span class="en">AMC GlobalTranslate</span><span class="ar">الترجمة العالمية من الأهلي الطبية</span></h1>
+                <p><span class="en">Professional AI Translation to Empower Your Business</span><span class="ar">ترجمة احترافية بالذكاء الاصطناعي لتمكين أعمالك</span></p>
             </div>
 
-            <!-- Tabs Navigation -->
             <div class="tabs">
                 <button class="tab-link active" onclick="openTab(event, 'file-translation')">
-                    <span class="en">File Translation</span> / <span class="ar">ترجمة الملفات</span>
+                    <img src="https://api.iconify.design/solar/document-add-bold-duotone.svg?color=%2300653e" alt="">
+                    <span class="en">Document Translation</span> / <span class="ar">ترجمة المستندات</span>
                 </button>
                 <button class="tab-link" onclick="openTab(event, 'text-translation')">
-                    <span class="en">Live Text</span> / <span class="ar">الترجمة الفورية</span>
+                    <img src="https://api.iconify.design/solar/text-field-focus-bold-duotone.svg?color=%2300653e" alt="">
+                    <span class="en">Instant Text</span> / <span class="ar">الترجمة الفورية</span>
                 </button>
             </div>
 
@@ -38,19 +39,25 @@
             <div id="file-translation" class="tab-content active">
                 <form id="file-upload-form">
                     <div class="language-selectors">
-                        <select id="file-source-lang" name="source_lang"></select>
-                        <img src="https://api.iconify.design/heroicons/arrows-right-left-20-solid.svg?color=%2349763a" class="lang-arrow">
-                        <select id="file-target-lang" name="target_lang"></select>
+                        <div class="select-wrapper">
+                            <select id="file-source-lang" name="source_lang"></select>
+                        </div>
+                        <img src="https://api.iconify.design/solar/transfer-horizontal-bold.svg?color=%2349763a" class="lang-arrow">
+                        <div class="select-wrapper">
+                            <select id="file-target-lang" name="target_lang"></select>
+                        </div>
                     </div>
 
                     <div class="upload-area" id="upload-area">
                         <input type="file" id="file-input" name="file" accept=".docx,.pdf,.png,.jpg,.jpeg,.pptx" hidden>
                         <label for="file-input" class="upload-label">
-                            <img src="https://api.iconify.design/material-symbols/cloud-upload-outline.svg?color=%2300653e" alt="Upload Icon" class="upload-icon">
+                            <div class="upload-icon-wrapper">
+                                <img src="https://api.iconify.design/solar/cloud-upload-bold.svg?color=%2300653e" alt="Upload Icon" class="upload-icon">
+                            </div>
                             <span id="file-name-display">
-                                <span class="en"><b>Click to upload</b> or drag & drop</span>
-                                <span class="ar"><b>انقر للرفع</b> أو قم بالسحب والإفلات</span>
-                                <small>(.docx, .pptx, .pdf, .png, .jpg)</small>
+                                <span class="en"><b>Click to upload</b> or drag & drop a file</span>
+                                <span class="ar"><b>انقر للرفع</b> أو قم بسحب وإفلات الملف</span>
+                                <small>(docx, pptx, pdf, png, jpg)</small>
                             </span>
                         </label>
                     </div>
@@ -63,17 +70,21 @@
 
             <!-- Live Text Translation Tab -->
             <div id="text-translation" class="tab-content">
-                <div class="language-selectors">
-                    <select id="text-source-lang"></select>
-                     <img src="https://api.iconify.design/heroicons/arrows-right-left-20-solid.svg?color=%2349763a" class="lang-arrow">
-                    <select id="text-target-lang"></select>
+                 <div class="language-selectors">
+                    <div class="select-wrapper">
+                        <select id="text-source-lang"></select>
+                    </div>
+                    <img src="https://api.iconify.design/solar/transfer-horizontal-bold.svg?color=%2349763a" class="lang-arrow">
+                    <div class="select-wrapper">
+                        <select id="text-target-lang"></select>
+                    </div>
                 </div>
                 <div class="text-areas">
                     <textarea id="source-text" placeholder="Enter text... / أدخل النص..."></textarea>
                     <div class="target-text-container">
                         <textarea id="target-text" placeholder="Translation... / الترجمة..." readonly></textarea>
-                        <button id="copy-btn" title="Copy text">
-                            <img src="https://api.iconify.design/material-symbols/content-copy-outline.svg?color=white">
+                        <button id="copy-btn" type="button" title="Copy text">
+                            <img src="https://api.iconify.design/solar/copy-bold.svg?color=white">
                         </button>
                     </div>
                 </div>
@@ -81,7 +92,7 @@
         </main>
 
         <footer class="app-footer">
-            <p><span class="en">Developed by <b>AMC Marketing Team</b></span> | <span class="ar">تم التطوير بواسطة <b>فريق التسويق لشركة الاهلى للخدمات الطبية</b></span></p>
+            <p><span class="en">Developed by <b>Al Ahly Medical Company Marketing Team</b></span> | <span class="ar">تم التطوير بواسطة <b>فريق شركة الاهلي للخدمات الطبية</b></span></p>
         </footer>
     </div>
 
