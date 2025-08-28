@@ -73,3 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
+<div class="result-area" id="result-area" style="display: none;">
+    <h2>النص المترجم:</h2>
+    <textarea id="translated-text" readonly></textarea>
+</div>
