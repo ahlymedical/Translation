@@ -7,21 +7,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const backButtons = document.querySelectorAll('.back-btn');
 
     function openWorkspace(workspaceId) {
-        selectionScreen.style.display = 'none';
-        fileWorkspace.style.display = 'none';
-        textWorkspace.style.display = 'none';
+        selectionScreen.classList.add('hidden');
+        fileWorkspace.classList.add('hidden');
+        textWorkspace.classList.add('hidden');
 
         if (workspaceId === 'file-translation') {
-            fileWorkspace.style.display = 'flex';
+            fileWorkspace.classList.remove('hidden');
         } else {
-            textWorkspace.style.display = 'flex';
+            textWorkspace.classList.remove('hidden');
         }
     }
 
     function showSelectionScreen() {
-        fileWorkspace.style.display = 'none';
-        textWorkspace.style.display = 'none';
-        selectionScreen.style.display = 'flex';
+        fileWorkspace.classList.add('hidden');
+        textWorkspace.classList.add('hidden');
+        selectionScreen.classList.remove('hidden');
     }
 
     openDocButton.addEventListener('click', () => openWorkspace('file-translation'));
