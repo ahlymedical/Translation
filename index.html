@@ -6,12 +6,16 @@
     <title>AMC GlobalTranslate | الترجمة العالمية من الأهلي الطبية</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <div class="page-background"></div>
+    <!-- Dynamic Aurora Background Elements -->
+    <div class="aurora-background">
+        <div class="aurora-shape shape-1"></div>
+        <div class="aurora-shape shape-2"></div>
+    </div>
 
     <div class="main-container">
         <header class="app-header">
@@ -21,17 +25,17 @@
         <main class="app-main">
             <div class="title-container">
                 <h1><span class="en">AMC GlobalTranslate</span><span class="ar">الترجمة العالمية من الأهلي الطبية</span></h1>
-                <p><span class="en">Professional AI Translation to Empower Your Business</span><span class="ar">ترجمة احترافية بالذكاء الاصطناعي لتمكين أعمالك</span></p>
+                <p><span class="en">AI-powered, seamless translation for professional documents.</span><span class="ar">ترجمة احترافية بالذكاء الاصطناعي لمستنداتك الهامة.</span></p>
             </div>
 
             <div class="tabs">
                 <button class="tab-link active" onclick="openTab(event, 'file-translation')">
-                    <img src="https://api.iconify.design/solar/document-add-bold-duotone.svg?color=%2300653e" alt="Document Icon">
-                    <span class="en">Document Translation</span> / <span class="ar">ترجمة المستندات</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 6H7.5C6.11929 6 5 7.11929 5 8.5V17.5C5 18.8807 6.11929 20 7.5 20H16.5C17.8807 20 19 18.8807 19 17.5V8.5C19 7.11929 17.8807 6 16.5 6ZM7.5 4C4.94772 4 3 6.01472 3 8.5V17.5C3 20.0523 4.94772 22 7.5 22H16.5C19.0523 22 21 20.0523 21 17.5V8.5C21 6.01472 19.0523 4 16.5 4H7.5ZM13 13H15V15H13V13ZM9 13H11V15H9V13ZM13 9H15V11H13V9ZM9 9H11V11H9V9Z"></path></svg>
+                    <span><span class="en">Document</span> / <span class="ar">المستندات</span></span>
                 </button>
                 <button class="tab-link" onclick="openTab(event, 'text-translation')">
-                    <img src="https://api.iconify.design/solar/text-field-focus-bold-duotone.svg?color=%2300653e" alt="Text Icon">
-                    <span class="en">Instant Text</span> / <span class="ar">الترجمة الفورية</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M5 4H19C19.5523 4 20 4.44772 20 5V19C20 19.5523 19.5523 20 19 20H5C4.44772 20 4 19.5523 4 19V5C4 4.44772 4.44772 4 5 4ZM2 5C2 3.34315 3.34315 2 5 2H19C20.6569 2 22 3.34315 22 5V19C22 20.6569 20.6569 22 19 22H5C3.34315 22 2 20.6569 2 19V5ZM13 6H15V11H13V6ZM8 8H10V18H8V8Z"></path></svg>
+                    <span><span class="en">Instant Text</span> / <span class="ar">النص الفوري</span></span>
                 </button>
             </div>
 
@@ -62,7 +66,6 @@
                         </label>
                     </div>
 
-                    <!-- New Progress Bar Container -->
                     <div id="progress-container" class="progress-container" style="display: none;">
                         <div class="progress-info">
                             <span id="progress-text" class="progress-text">جاري التحميل... 0%</span>
@@ -72,10 +75,10 @@
                             <div id="progress-bar" class="progress-bar"></div>
                         </div>
                     </div>
-                    <!-- End of New Progress Bar Container -->
                     
                     <button type="submit" class="action-btn" id="translate-file-btn">
-                        <span class="en">Translate & Download</span> / <span class="ar">ترجم وحمّل</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12.0006 18.26L4.9292 21.0711L6.52246 13.28L0.595917 8.03874L8.47128 7.32703L12.0006 0L15.5299 7.32703L23.4053 8.03874L17.4787 13.28L19.072 21.0711L12.0006 18.26Z"></path></svg>
+                        <span><span class="en">Translate & Download</span> / <span class="ar">ترجم وحمّل</span></span>
                     </button>
                 </form>
             </div>
@@ -107,7 +110,7 @@
         </main>
 
         <footer class="app-footer">
-            <p><span class="en">Developed by <b>Al Ahly Medical Company Marketing Team</b></span> | <span class="ar">تم التطوير بواسطة <b>فريق شركة الاهلي للخدمات الطبية</b></span></p>
+            <p><span class="en">Developed by <b>Al Ahly Medical Company</b></span> | <span class="ar">تم التطوير بواسطة <b>شركة الأهلي للخدمات الطبية</b></span></p>
         </footer>
     </div>
 
