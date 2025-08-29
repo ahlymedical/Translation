@@ -51,6 +51,13 @@ document.addEventListener('DOMContentLoaded', () => {
         fileStatusContainer.style.backgroundColor = isError ? '#fce8e6' : '#f1f5f9';
     }
 
+    function resetFileUI() {
+        fileInput.value = ''; // Clear the file input
+        fileNameDisplay.querySelector('.en b').textContent = 'Click to upload';
+        fileNameDisplay.querySelector('.ar b').textContent = 'انقر للرفع';
+        dynamicUploadIcon.src = fileIcons.default;
+    }
+
     async function handleFileSubmit(e) {
         e.preventDefault();
         if (fileInput.files.length === 0) {
@@ -59,7 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const formData = new FormData(fileForm);
-        showFileStatus('Processing... This may take a moment for large files. / جاري المعالجة...');
+        showFileStatus('Processing... This may take a moment. / جاري المعالجة...');
         translateFileBtn.disabled = true;
 
         try {
@@ -98,6 +105,10 @@ document.addEventListener('DOMContentLoaded', () => {
             showFileStatus(`Error: ${error.message}`, true);
         } finally {
             translateFileBtn.disabled = false;
+            // Reset the UI for the next upload after a delay
+            setTimeout(() => {
+                resetFileUI();
+            }, 4000);
         }
     }
 
@@ -129,6 +140,9 @@ document.addEventListener('DOMContentLoaded', () => {
             targetTextArea.value = data.translated_text;
         } catch (error) {
             targetTextArea.value = `Error: ${error.message}`;
+            console.error('Text Translation Error:', error);
+        } finally {
+            targetTextArea.placeholder = "Translation... / الترجمة...";
         }
     }
 
