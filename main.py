@@ -1,6 +1,6 @@
 import os
 import io
-import traceback # Import traceback for detailed error logging
+import traceback
 import google.generativeai as genai
 import docx
 import PyPDF2
@@ -8,6 +8,7 @@ from PIL import Image
 from pptx import Presentation
 from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
+from werkzeug.utils import secure_filename # Import secure_filename for safety
 
 # --- Settings ---
 app = Flask(__name__, static_folder='.', static_url_path='')
@@ -22,7 +23,6 @@ try:
         raise ValueError("GEMINI_API_KEY environment variable not set or found.")
     
     genai.configure(api_key=GEMINI_API_KEY)
-    # Using a model that explicitly supports vision capabilities
     model = genai.GenerativeModel('gemini-1.5-pro-latest') 
     print("✅ Gemini API configured successfully with gemini-1.5-pro-latest model.")
 except Exception as e:
@@ -67,43 +67,43 @@ def serve_index():
 
 @app.route('/translate-file', methods=['POST'])
 def translate_file_handler():
+    print("--- Received request for /translate-file ---") # New log entry
     if not model:
         print(f"❌ Error: Translate-file request failed because Gemini model is not initialized. Reason: {api_key_error}")
         return jsonify({"error": f"API service is not configured. Please contact support. Reason: {api_key_error}"}), 500
 
     if 'file' not in request.files:
+        print("❌ Error: No 'file' part in the request files.")
         return jsonify({"error": "No file part in the request."}), 400
 
     file = request.files['file']
-    source_lang = request.form.get('source_lang', 'auto')
-    target_lang = request.form.get('target_lang', 'English')
     
     if file.filename == '':
+        print("❌ Error: No file selected (filename is empty).")
         return jsonify({"error": "No file selected."}), 400
+    
+    # Use secure_filename to prevent malicious file names
+    filename = secure_filename(file.filename).lower()
+    print(f"Processing file: {filename}")
 
     try:
-        filename = file.filename.lower()
-        original_text = ""
+        source_lang = request.form.get('source_lang', 'auto')
+        target_lang = request.form.get('target_lang', 'English')
         translated_text = ""
         
-        print(f"Processing file: {filename}")
-
-        # --- THIS IS THE MODIFIED AND IMPROVED SECTION ---
         if filename.endswith(('.png', '.jpg', '.jpeg')):
             print("Image file detected. Processing with vision model.")
             image = Image.open(file.stream)
-            
-            # Constructing a more robust multimodal prompt
             prompt_parts = [
-                f"Your task is to extract any text from the following image and then translate that extracted text professionally into {target_lang}. You must provide ONLY the final translated text and nothing else, no explanations or introductory phrases.",
+                f"Your task is to extract any text from the following image and then translate that extracted text professionally into {target_lang}. You must provide ONLY the final translated text and nothing else.",
                 image,
             ]
-            
             response = model.generate_content(prompt_parts)
             translated_text = response.text
             print("Image translation successful.")
 
         elif filename.endswith(('.docx', '.pdf', '.pptx')):
+            original_text = ""
             if filename.endswith('.docx'):
                 original_text = read_text_from_docx(file.stream)
             elif filename.endswith('.pdf'):
@@ -115,11 +115,10 @@ def translate_file_handler():
                 print("⚠️ Warning: Could not extract text from document or document is empty.")
                 return jsonify({"error": "Could not extract any text from the document or the file is empty."}), 400
             
-            print(f"Text extracted from document. Translating from '{source_lang}' to '{target_lang}'...")
+            print(f"Text extracted. Translating from '{source_lang}' to '{target_lang}'...")
             prompt = (
-                f"You are an expert multilingual translator. Translate the following text from '{source_lang}' to '{target_lang}'. "
-                "The translation must be professional, accurate, and maintain the original formatting like paragraphs. "
-                "Provide only the translated text, with no extra commentary.\n\n"
+                f"Translate the following text from '{source_lang}' to '{target_lang}'. "
+                "Provide only the professional, accurate translated text.\n\n"
                 f"--- TEXT ---\n{original_text}"
             )
             response = model.generate_content(prompt)
@@ -140,34 +139,25 @@ def translate_file_handler():
         )
 
     except Exception as e:
-        # This will now print the FULL error traceback to your logs
-        print(f"!!!!!! An error occurred during file processing for {file.filename}: {e}")
+        print(f"!!!!!! CRITICAL ERROR during file processing for {filename}: {e}")
         detailed_error = traceback.format_exc()
         print(detailed_error)
-        return jsonify({"error": "An internal server error occurred during file processing. Please check the logs for details."}), 500
+        return jsonify({"error": "An internal server error occurred during file processing. Please check the logs."}), 500
 
-
+# The /translate-text endpoint remains unchanged as it is working correctly.
 @app.route('/translate-text', methods=['POST'])
 def translate_text_handler():
-    # This function is working correctly, no changes needed.
+    # ... (code for this function is unchanged) ...
     if not model:
-        print(f"❌ Error: Translate-text request failed because Gemini model is not initialized. Reason: {api_key_error}")
         return jsonify({"error": f"API service is not configured. Please contact support. Reason: {api_key_error}"}), 500
-
     data = request.get_json()
     text = data.get('text')
-    source_lang = data.get('source_lang', 'auto')
-    target_lang = data.get('target_lang', 'English')
-
     if not text:
         return jsonify({"error": "No text provided."}), 400
-
+    source_lang = data.get('source_lang', 'auto')
+    target_lang = data.get('target_lang', 'English')
     try:
-        prompt = (
-            f"Translate the following text from '{source_lang}' to '{target_lang}'. "
-            "Provide only the professional and accurate translated text.\n\n"
-            f"{text}"
-        )
+        prompt = (f"Translate the following text from '{source_lang}' to '{target_lang}'. Provide only the professional and accurate translated text.\n\n{text}")
         response = model.generate_content(prompt)
         return jsonify({"translated_text": response.text})
     except Exception as e:
