@@ -1,5 +1,5 @@
 /* ================================================================== */
-/* ============= CORPORATE ELEGANCE THEME - V8 FINAL ============== */
+/* ============= CORPORATE ELEGANCE THEME - V9 FINAL ============== */
 /* ================================================================== */
 
 :root {
@@ -15,8 +15,8 @@
     --text-light: #f8fafc;
     
     --border-color: #e2e8f0;
-    --accent-green: #10b981;
-    --accent-green-dark: #059669;
+    --accent-green-light: #4ade80;
+    --accent-green-dark: #16a34a; /* A darker shade for gradient */
     
     --font-en: 'Poppins', sans-serif;
     --font-ar: 'Cairo', sans-serif;
@@ -133,7 +133,7 @@ select {
 }
 .progress-bar {
     width: 0%; height: 100%;
-    background: linear-gradient(90deg, #4ade80, var(--accent-green));
+    background: linear-gradient(90deg, var(--accent-green-light), var(--accent-green-dark));
     border-radius: 16px; transition: width 0.5s cubic-bezier(0.25, 1, 0.5, 1);
     position: relative; overflow: hidden;
 }
@@ -143,12 +143,20 @@ select {
     animation: shimmer-wipe 1.8s infinite linear;
 }
 
+/* === NEW BUTTON CONTAINER === */
+.form-actions {
+    display: grid;
+    gap: 0.75rem;
+}
+
 .submit-btn, .download-btn {
-    color: white; border: none; padding: 1rem; border-radius: 12px;
-    font-size: 1.1rem; font-weight: 600; cursor: pointer;
+    width: 100%;
+    color: white; border: none; padding: 0.9rem; border-radius: 12px;
+    font-size: 1rem; font-weight: 600; cursor: pointer;
     transition: all 0.3s ease;
     display: flex; align-items: center; justify-content: center; gap: 0.75rem;
 }
+
 .submit-btn {
     background: linear-gradient(45deg, var(--amc-orange), var(--amc-orange-dark));
     box-shadow: 0 4px 15px rgba(225, 84, 35, 0.3);
@@ -156,11 +164,12 @@ select {
 .submit-btn:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(225, 84, 35, 0.4); }
 
 .download-btn {
-    background: linear-gradient(45deg, var(--accent-green), var(--accent-green-dark));
-    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+    background: linear-gradient(45deg, #428b4c, var(--amc-green));
+    box-shadow: 0 4px 15px rgba(73, 118, 58, 0.3);
 }
 .download-btn svg { width: 20px; height: 20px; }
-.download-btn:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4); }
+.download-btn:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(73, 118, 58, 0.4); }
+
 
 .text-areas { display: flex; gap: 1rem; }
 textarea {
