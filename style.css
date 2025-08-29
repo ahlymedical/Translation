@@ -26,7 +26,7 @@ body {
     color: var(--text-primary);
     display: flex;
     justify-content: center;
-    align-items: flex-start; /* Align to top for better mobile experience */
+    align-items: flex-start; 
     min-height: 100vh;
     padding: 2rem;
 }
@@ -82,7 +82,7 @@ body {
     align-items: center;
     justify-content: center;
     gap: 8px;
-    white-space: nowrap; /* Prevent text wrapping on larger screens */
+    white-space: nowrap; 
 }
 .tab-link img { width: 24px; height: 24px; }
 .tab-link.active {
@@ -190,14 +190,6 @@ body {
 #file-name-display b { color: var(--amc-dark-green); }
 #file-name-display small { color: var(--text-secondary); font-size: 0.9rem; margin-top: 5px; }
 
-.status-container {
-    text-align: center;
-    padding: 1rem;
-    border-radius: 10px;
-    margin-bottom: 1.5rem;
-    font-weight: 600;
-}
-
 .action-btn {
     width: 100%;
     background: linear-gradient(45deg, var(--amc-orange), #f56a3d);
@@ -249,99 +241,4 @@ body {
     width: 40px;
     height: 40px;
     cursor: pointer;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: all 0.3s;
-}
-#copy-btn:hover { background: var(--amc-dark-green); transform: scale(1.1); }
-#copy-btn img { width: 22px; height: 22px; }
-
-.app-footer {
-    text-align: center;
-    margin-top: 2.5rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid var(--border-color);
-    font-size: 0.9rem;
-    color: var(--text-secondary);
-}
-
-/* ================================================================== */
-/* =================== MOBILE RESPONSIVE STYLES =================== */
-/* ================================================================== */
-
-@media (max-width: 768px) {
-    body {
-        padding: 1rem;
-        align-items: flex-start; /* Align container to the top */
-    }
-
-    .main-container {
-        padding: 1.5rem;
-        margin-top: 1rem; /* Add some space from the top edge */
-    }
-    
-    .logo {
-        height: 60px; /* Make logo slightly smaller */
-    }
-
-    .title-container h1 {
-        font-size: 1.8rem; /* Reduce heading size */
-    }
-    
-    .title-container .ar {
-        font-size: 1.6rem;
-    }
-
-    .title-container p {
-        font-size: 1rem; /* Reduce paragraph size */
-    }
-    
-    /* Make tabs vertical for better fit */
-    .tabs {
-        flex-direction: column;
-        gap: 6px;
-    }
-    
-    .tab-link {
-        white-space: normal; /* Allow text to wrap inside tabs */
-        justify-content: flex-start; /* Align content to the start */
-        padding: 12px 15px;
-    }
-
-    /* Stack language selectors vertically */
-    .language-selectors {
-        grid-template-columns: 1fr; /* Single column layout */
-        gap: 0.75rem;
-    }
-    
-    /* Rotate the arrow to point downwards */
-    .lang-arrow {
-        transform: rotate(90deg);
-        margin: 0.5rem auto; /* Center the arrow */
-    }
-    
-    .upload-area {
-        padding: 2rem 1.5rem; /* Adjust padding */
-    }
-
-    /* Stack text areas vertically */
-    .text-areas {
-        grid-template-columns: 1fr;
-        gap: 1rem;
-    }
-    
-    .text-areas textarea {
-        height: 200px; /* Adjust height for smaller screens */
-    }
-
-    /* Adjust margins for better spacing */
-    .app-header, .title-container, .tabs, .upload-area {
-        margin-bottom: 2rem;
-    }
-    
-    .app-footer {
-        margin-top: 2rem;
-        font-size: 0.8rem; /* Make footer text smaller */
-    }
-}
+   
