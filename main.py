@@ -1,5 +1,6 @@
 import os
 import io
+import traceback
 import google.generativeai as genai
 import docx
 import PyPDF2
@@ -18,14 +19,15 @@ api_key_error = None
 try:
     GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY')
     if not GEMINI_API_KEY:
-        raise ValueError("GEMINI_API_KEY environment variable not found.")
+        raise ValueError("GEMINI_API_KEY environment variable not set or found.")
     
     genai.configure(api_key=GEMINI_API_KEY)
     model = genai.GenerativeModel('gemini-1.5-pro-latest')
-    print("Gemini API configured successfully with 1.5 Pro model.")
+    print("✅ Gemini API configured successfully with 1.5 Pro model.")
 except Exception as e:
-    print(f"!!!!!! FATAL ERROR during Gemini API setup: {e}")
     api_key_error = str(e)
+    print(f"!!!!!! FATAL ERROR during Gemini API setup: {api_key_error}")
+    traceback.print_exc()
 
 # --- Text Extraction Helper Functions ---
 def read_text_from_docx(stream):
@@ -49,12 +51,10 @@ def read_text_from_pptx(stream):
     return '\n'.join(text_runs)
 
 def create_docx_from_text(text):
-    """Creates a Word document from text and returns it as an in-memory file."""
+    mem_file = io.BytesIO()
     doc = docx.Document()
     for paragraph in text.split('\n'):
         doc.add_paragraph(paragraph)
-    
-    mem_file = io.BytesIO()
     doc.save(mem_file)
     mem_file.seek(0)
     return mem_file
@@ -68,7 +68,8 @@ def serve_index():
 @app.route('/translate-file', methods=['POST'])
 def translate_file_handler():
     if not model:
-        return jsonify({"error": f"Gemini API is not configured: {api_key_error}"}), 500
+        print(f"❌ Error: Translate-file request failed because Gemini model is not initialized. Reason: {api_key_error}")
+        return jsonify({"error": f"API service is not configured. Please contact support. Reason: {api_key_error}"}), 500
 
     if 'file' not in request.files:
         return jsonify({"error": "No file part in the request."}), 400
@@ -82,8 +83,11 @@ def translate_file_handler():
 
     try:
         filename = file.filename.lower()
-        original_text = None
+        original_text = ""
+        is_image = False
         
+        print(f"Processing file: {filename}, Size: {file.content_length} bytes")
+
         if filename.endswith('.docx'):
             original_text = read_text_from_docx(file.stream)
         elif filename.endswith('.pdf'):
@@ -91,30 +95,33 @@ def translate_file_handler():
         elif filename.endswith('.pptx'):
             original_text = read_text_from_pptx(file.stream)
         elif filename.endswith(('.png', '.jpg', '.jpeg')):
+            is_image = True
             image = Image.open(file.stream)
-            response = model.generate_content([
-                f"Extract text from this image and translate it to {target_lang}. Provide only the translated text.", image
-            ])
-            original_text = response.text
         else:
             return jsonify({"error": "Unsupported file type."}), 400
 
-        if not original_text or not original_text.strip():
-            return jsonify({"error": "Could not extract text from the file or the file is empty."}), 400
-
-        if not filename.endswith(('.png', '.jpg', '.jpeg')):
+        translated_text = ""
+        
+        if is_image:
+            print("Performing image-to-text and translation...")
+            prompt = f"Extract all text from this image and provide only its professional translation into {target_lang}."
+            response = model.generate_content([prompt, image])
+            translated_text = response.text
+        elif original_text and original_text.strip():
+            print(f"Performing text translation from '{source_lang}' to '{target_lang}'...")
             prompt = (
                 f"You are an expert multilingual translator. Translate the following text from '{source_lang}' to '{target_lang}'. "
-                "The translation must be professional and accurate. Provide only the translated text.\n\n"
+                "The translation must be professional, accurate, and maintain the original formatting as much as possible (like paragraphs). "
+                "Provide only the translated text, with no extra commentary.\n\n"
                 f"--- TEXT ---\n{original_text}"
             )
             response = model.generate_content(prompt)
             translated_text = response.text
         else:
-            translated_text = original_text
+             return jsonify({"error": "Could not extract any text from the document or the file is empty."}), 400
 
+        print("Translation successful. Creating downloadable file.")
         translated_doc_stream = create_docx_from_text(translated_text)
-        
         new_filename = f"translated_{os.path.splitext(file.filename)[0]}.docx"
 
         return send_file(
@@ -125,15 +132,15 @@ def translate_file_handler():
         )
 
     except Exception as e:
-        print(f"!!!!!! An error occurred during file processing: {e}")
-        error_response = jsonify({"error": f"An internal server error occurred: {str(e)}"})
-        error_response.status_code = 500
-        return error_response
+        print(f"!!!!!! An error occurred during file processing for {file.filename}: {e}")
+        traceback.print_exc()
+        return jsonify({"error": "An internal server error occurred during file processing. Please try again later."}), 500
 
 @app.route('/translate-text', methods=['POST'])
 def translate_text_handler():
     if not model:
-        return jsonify({"error": f"Gemini API is not configured: {api_key_error}"}), 500
+        print(f"❌ Error: Translate-text request failed because Gemini model is not initialized. Reason: {api_key_error}")
+        return jsonify({"error": f"API service is not configured. Please contact support. Reason: {api_key_error}"}), 500
 
     data = request.get_json()
     text = data.get('text')
@@ -153,8 +160,9 @@ def translate_text_handler():
         return jsonify({"translated_text": response.text})
     except Exception as e:
         print(f"!!!!!! An error occurred during text translation: {e}")
-        return jsonify({"error": f"An internal server error occurred: {str(e)}"}), 500
+        traceback.print_exc()
+        return jsonify({"error": "An internal error occurred during translation. Please try again."}), 500
 
 if __name__ == "__main__":
     port = int(os.environ.get('PORT', 8080))
-    app.run(debug=True, host='0.0.0.0', port=port)
+    app.run(debug=False, host='0.0.0.0', port=port) # Set debug=False for production
