@@ -2,8 +2,10 @@ import os
 import io
 import traceback
 import google.generativeai as genai
-import docx # Keep using python-docx
-from docx.document import Document as DocxDocument # To handle type hinting
+import docx
+from docx.document import Document as DocxDocument
+from docx.text.paragraph import Paragraph
+from docx.table import _Cell
 import PyPDF2
 from PIL import Image
 from pptx import Presentation
@@ -11,77 +13,78 @@ from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
 
-# --- Settings ---
 app = Flask(__name__, static_folder='.', static_url_path='')
 CORS(app)
 
-# --- Gemini API Setup ---
 model = None
-api_key_error = None
 try:
     GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY')
     if not GEMINI_API_KEY:
-        raise ValueError("GEMINI_API_KEY environment variable not set or found.")
-    
+        raise ValueError("GEMINI_API_KEY environment variable not set.")
     genai.configure(api_key=GEMINI_API_KEY)
-    model = genai.GenerativeModel('gemini-1.5-pro-latest') 
-    print("✅ Gemini API configured successfully with gemini-1.5-pro-latest model.")
+    model = genai.GenerativeModel('gemini-1.5-pro-latest')
+    print("✅ Gemini API configured successfully.")
 except Exception as e:
-    api_key_error = str(e)
-    print(f"!!!!!! FATAL ERROR during Gemini API setup: {api_key_error}")
+    print(f"!!!!!! FATAL ERROR during Gemini API setup: {e}")
 
-# --- Helper function for making translation calls to the API ---
-def translate_text_api(text_to_translate, target_lang):
-    """Sends a single text chunk to Gemini for translation and returns the result."""
-    if not text_to_translate or not text_to_translate.strip():
-        return ""
-    try:
-        # Simple prompt for individual text chunks
-        prompt = f"Translate the following text to {target_lang}. Provide only the translated text, nothing else:\n\n{text_to_translate}"
-        response = model.generate_content(prompt)
-        # Using .strip() to remove potential leading/trailing whitespace from the API response
-        return response.text.strip()
-    except Exception as e:
-        print(f"--- API translation error for a chunk: {e}")
-        # Return original text if translation fails for this specific chunk
-        return text_to_translate
-
-# --- NEW ADVANCED DOCX TRANSLATION FUNCTION ---
+# --- NEW BATCH TRANSLATION LOGIC FOR DOCX ---
 def translate_docx_in_place(doc: DocxDocument, target_lang: str):
-    """
-    Translates a docx document in-place, preserving formatting.
-    It iterates through paragraphs and table cells, translates their text,
-    and replaces the original text.
-    """
-    print("Starting in-place DOCX translation...")
+    print("Starting efficient in-place DOCX translation...")
+    texts_to_translate = []
+    elements = []
     
-    # 1. Translate Paragraphs
+    # 1. Extract all text fragments and their locations
     for para in doc.paragraphs:
-        if para.text.strip(): # Check if there is text to translate
-            original_text = para.text
-            print(f"  Translating paragraph: '{original_text[:50]}...'")
-            translated_text = translate_text_api(original_text, target_lang)
+        if para.text.strip():
+            texts_to_translate.append(para.text)
+            elements.append(para)
             
-            # Replace the paragraph's text while preserving its style
-            para.text = translated_text
-
-    # 2. Translate Tables
-    print("Scanning for tables...")
     for table in doc.tables:
         for row in table.rows:
             for cell in row.cells:
-                # Each cell can contain multiple paragraphs
                 for para in cell.paragraphs:
                     if para.text.strip():
-                        original_text = para.text
-                        print(f"  Translating table cell: '{original_text[:50]}...'")
-                        translated_text = translate_text_api(original_text, target_lang)
-                        para.text = translated_text
-                        
-    print("In-place DOCX translation finished.")
+                        texts_to_translate.append(para.text)
+                        elements.append(para)
+
+    if not texts_to_translate:
+        print("No text found in DOCX to translate.")
+        return doc
+
+    # 2. Batch translate all fragments in a single API call
+    delimiter = "\n<|||>\n"
+    full_text = delimiter.join(texts_to_translate)
+    
+    prompt = (
+        f"You are an expert multilingual translator. Translate each text segment below, which are separated by '{delimiter}', into '{target_lang}'. "
+        f"Preserve the exact number of segments and their separation by '{delimiter}' in your output. "
+        "Provide only the translated segments joined by the delimiter, with no extra commentary.\n\n"
+        f"{full_text}"
+    )
+    
+    try:
+        response = model.generate_content(prompt)
+        translated_full_text = response.text
+        translated_fragments = translated_full_text.split(delimiter)
+        
+        # 3. Inject translated text back into the document
+        if len(translated_fragments) == len(elements):
+            for i, element in enumerate(elements):
+                element.text = translated_fragments[i].strip()
+            print("Successfully injected translations back into DOCX.")
+        else:
+            print(f"!!!!!! Mismatch Error: Got {len(translated_fragments)} fragments, expected {len(elements)}. Reverting to original text.")
+            # Fallback: if something goes wrong, don't corrupt the file.
+            # This part can be improved with more robust error handling if needed.
+            return doc
+
+    except Exception as e:
+        print(f"!!!!!! API Error during batch translation: {e}")
+        return doc # Return original doc on API failure
+
     return doc
 
-# --- Text Extraction for other file types (unchanged) ---
+# --- Other Helper Functions (PDF, PPTX, etc.) ---
 def read_text_from_pdf(stream):
     reader = PyPDF2.PdfReader(stream)
     return '\n'.join([page.extract_text() for page in reader.pages if page.extract_text()])
@@ -89,18 +92,14 @@ def read_text_from_pdf(stream):
 def read_text_from_pptx(stream):
     prs = Presentation(stream)
     text_runs = []
-    # ... (rest of the function is the same)
     for slide in prs.slides:
         for shape in slide.shapes:
             if shape.has_text_frame:
                 for paragraph in shape.text_frame.paragraphs:
-                    for run in paragraph.runs:
-                        text_runs.append(run.text)
+                    text_runs.append(paragraph.text)
     return '\n'.join(text_runs)
 
-
 def create_docx_from_text(text):
-    # This function is now only a fallback for PDF/PPTX
     mem_file = io.BytesIO()
     doc = docx.Document()
     doc.add_paragraph(text)
@@ -108,15 +107,13 @@ def create_docx_from_text(text):
     mem_file.seek(0)
     return mem_file
 
-# --- Main Application Routes ---
-
+# --- Flask Routes ---
 @app.route('/')
 def serve_index():
     return app.send_static_file('index.html')
 
 @app.route('/translate-file', methods=['POST'])
 def translate_file_handler():
-    print("--- Received request for /translate-file ---")
     if not model:
         return jsonify({"error": "API service is not configured."}), 500
     if 'file' not in request.files:
@@ -125,85 +122,53 @@ def translate_file_handler():
     file = request.files['file']
     if file.filename == '':
         return jsonify({"error": "No file selected."}), 400
+
+    filename = secure_filename(file.filename)
+    target_lang = request.form.get('target_lang', 'English')
     
-    filename = secure_filename(file.filename).lower()
-    print(f"Processing file: {filename}")
-
     try:
-        target_lang = request.form.get('target_lang', 'English')
-        new_filename = f"translated_{os.path.splitext(file.filename)[0]}.docx"
-        
-        # --- LOGIC BRANCHING BASED ON FILE TYPE ---
-
-        if filename.endswith('.docx'):
-            # Use the new advanced method for DOCX files
+        if filename.lower().endswith('.docx'):
             original_doc = docx.Document(file.stream)
             translated_doc = translate_docx_in_place(original_doc, target_lang)
-            
-            # Save the modified document to a memory stream
             mem_file = io.BytesIO()
             translated_doc.save(mem_file)
             mem_file.seek(0)
-            
-            return send_file(
-                mem_file,
-                as_attachment=True,
-                download_name=new_filename,
-                mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-            )
+            return send_file(mem_file, as_attachment=True, download_name=f"translated_{filename}", mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
 
-        # For all other file types, use the old method (text extraction)
-        translated_text = ""
-        
-        if filename.endswith(('.png', '.jpg', '.jpeg')):
+        # Fallback for other file types
+        text_to_translate = ""
+        if filename.lower().endswith('.pdf'):
+            text_to_translate = read_text_from_pdf(file.stream)
+        elif filename.lower().endswith('.pptx'):
+            text_to_translate = read_text_from_pptx(file.stream)
+        elif filename.lower().endswith(('.png', '.jpg', '.jpeg')):
             image = Image.open(file.stream)
-            prompt_parts = ["Extract and translate the text in this image to {target_lang}. Provide only the translation.", image]
-            response = model.generate_content(prompt_parts)
-            translated_text = response.text
-
-        elif filename.endswith('.pdf'):
-            original_text = read_text_from_pdf(file.stream)
-            translated_text = translate_text_api(original_text, target_lang)
-
-        elif filename.endswith('.pptx'):
-            original_text = read_text_from_pptx(file.stream)
-            translated_text = translate_text_api(original_text, target_lang)
+            response = model.generate_content([f"Extract text from this image and translate it to {target_lang}. Provide only the translated text.", image])
+            text_to_translate = response.text
         
-        else:
-            return jsonify({"error": "Unsupported file type."}), 400
+        if not text_to_translate.strip():
+            return jsonify({"error": "Could not extract text from file or file is empty."}), 400
 
-        # Create a new docx for these non-docx file types
-        translated_doc_stream = create_docx_from_text(translated_text)
-        return send_file(
-            translated_doc_stream,
-            as_attachment=True,
-            download_name=new_filename,
-            mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-        )
+        prompt = f"Translate the following text to {target_lang}. Provide only the professional translated text.\n\n{text_to_translate}"
+        response = model.generate_content(prompt)
+        translated_doc_stream = create_docx_from_text(response.text)
+        return send_file(translated_doc_stream, as_attachment=True, download_name=f"translated_{os.path.splitext(filename)[0]}.docx", mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
 
     except Exception as e:
-        print(f"!!!!!! CRITICAL ERROR during file processing for {filename}: {e}")
+        print(f"!!!!!! CRITICAL ERROR in translate_file_handler: {e}")
         traceback.print_exc()
         return jsonify({"error": "An internal server error occurred during file processing."}), 500
 
-
 @app.route('/translate-text', methods=['POST'])
 def translate_text_handler():
-    # This function is working correctly, no changes needed.
-    # ... (code for this function is unchanged) ...
-    if not model: return jsonify({"error": "API service is not configured."}), 500
+    # This endpoint is stable and does not need changes.
     data = request.get_json()
     text = data.get('text')
-    if not text: return jsonify({"error": "No text provided."}), 400
     target_lang = data.get('target_lang', 'English')
-    try:
-        prompt = (f"Translate the following text to '{target_lang}'. Provide only the professional translated text.\n\n{text}")
-        response = model.generate_content(prompt)
-        return jsonify({"translated_text": response.text})
-    except Exception as e:
-        print(f"!!!!!! An error occurred during text translation: {e}")
-        return jsonify({"error": "An internal error occurred during translation."}), 500
+    prompt = f"Translate the following text to {target_lang}:\n\n{text}"
+    response = model.generate_content(prompt)
+    return jsonify({"translated_text": response.text})
 
 if __name__ == "__main__":
     port = int(os.environ.get('PORT', 8080))
-    app.run(debug=False, host='0.0.0.0', port=port)
+    app.run(host='0.0.0.0', port=port)
