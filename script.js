@@ -8,21 +8,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const backButtons = document.querySelectorAll('.back-btn');
 
     function openWorkspace(workspaceId) {
-        selectionScreen.classList.add('hidden');
-        fileWorkspace.classList.add('hidden');
-        textWorkspace.classList.add('hidden');
+        selectionScreen.style.display = 'none';
+        fileWorkspace.style.display = 'none';
+        textWorkspace.style.display = 'none';
 
         if (workspaceId === 'file-translation') {
-            fileWorkspace.classList.remove('hidden');
+            fileWorkspace.style.display = 'flex';
         } else {
-            textWorkspace.classList.remove('hidden');
+            textWorkspace.style.display = 'flex';
         }
     }
 
     function showSelectionScreen() {
-        fileWorkspace.classList.add('hidden');
-        textWorkspace.classList.add('hidden');
-        selectionScreen.classList.remove('hidden');
+        fileWorkspace.style.display = 'none';
+        textWorkspace.style.display = 'none';
+        selectionScreen.style.display = 'flex';
     }
 
     openDocButton.addEventListener('click', () => openWorkspace('file-translation'));
@@ -156,7 +156,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const baseName = nameParts.join('.');
             translatedFileName = `translated_${baseName}.docx`;
 
-            // Show download button, hide translate button
             translateFileBtn.classList.add('hidden');
             downloadReadyBtn.classList.remove('hidden');
 
@@ -182,7 +181,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
     async function handleTextTranslation() {
-        // (This function remains unchanged, it is working correctly)
         const text = sourceTextArea.value.trim();
         if (!text) return;
         targetTextArea.placeholder = "Translating...";
