@@ -25,57 +25,43 @@ try:
 except Exception as e:
     print(f"!!!!!! FATAL ERROR during Gemini API setup: {e}")
 
+# --- Helper function for making translation calls to the API ---
+def translate_text_api(text_to_translate, target_lang):
+    if not text_to_translate or not text_to_translate.strip():
+        return ""
+    try:
+        prompt = f"You are an expert multilingual translator. Translate the following text to {target_lang}. Understand the context professionally. Provide only the translated text, nothing else:\n\n{text_to_translate}"
+        response = model.generate_content(prompt)
+        return response.text.strip()
+    except Exception as e:
+        print(f"--- API translation error for a chunk: {e}")
+        return text_to_translate
+
+# --- YOUR PREFERRED DOCX TRANSLATION ENGINE ---
 def translate_docx_in_place(doc: DocxDocument, target_lang: str):
-    print("Starting efficient in-place DOCX translation...")
-    texts_to_translate = []
-    elements = []
+    print("Starting in-place DOCX translation (paragraph by paragraph)...")
     
+    # 1. Translate Paragraphs
     for para in doc.paragraphs:
         if para.text.strip():
-            texts_to_translate.append(para.text)
-            elements.append(para)
-            
+            original_text = para.text
+            translated_text = translate_text_api(original_text, target_lang)
+            para.text = translated_text
+
+    # 2. Translate Tables
     for table in doc.tables:
         for row in table.rows:
             for cell in row.cells:
                 for para in cell.paragraphs:
                     if para.text.strip():
-                        texts_to_translate.append(para.text)
-                        elements.append(para)
-
-    if not texts_to_translate:
-        print("No text found in DOCX to translate.")
-        return doc
-
-    delimiter = "\n<|||>\n"
-    full_text = delimiter.join(texts_to_translate)
-    
-    prompt = (
-        f"You are an expert multilingual translator. Translate each text segment below, which are separated by '{delimiter}', into '{target_lang}'. "
-        f"Preserve the exact number of segments and their separation by '{delimiter}' in your output. "
-        "Provide only the translated segments joined by the delimiter, with no extra commentary.\n\n"
-        f"{full_text}"
-    )
-    
-    try:
-        response = model.generate_content(prompt)
-        translated_full_text = response.text
-        translated_fragments = translated_full_text.split(delimiter)
-        
-        if len(translated_fragments) == len(elements):
-            for i, element in enumerate(elements):
-                element.text = translated_fragments[i].strip()
-            print("Successfully injected translations back into DOCX.")
-        else:
-            print(f"!!!!!! Mismatch Error: Got {len(translated_fragments)} fragments, expected {len(elements)}. Reverting to original text.")
-            return doc
-
-    except Exception as e:
-        print(f"!!!!!! API Error during batch translation: {e}")
-        return doc 
-
+                        original_text = para.text
+                        translated_text = translate_text_api(original_text, target_lang)
+                        para.text = translated_text
+                        
+    print("In-place DOCX translation finished.")
     return doc
 
+# --- Other Helper Functions (PDF, PPTX, etc.) ---
 def read_text_from_pdf(stream):
     reader = PyPDF2.PdfReader(stream)
     return '\n'.join([page.extract_text() for page in reader.pages if page.extract_text()])
@@ -98,20 +84,18 @@ def create_docx_from_text(text):
     mem_file.seek(0)
     return mem_file
 
+# --- Flask Routes ---
 @app.route('/')
 def serve_index():
     return app.send_static_file('index.html')
 
 @app.route('/translate-file', methods=['POST'])
 def translate_file_handler():
-    if not model:
-        return jsonify({"error": "API service is not configured."}), 500
-    if 'file' not in request.files:
-        return jsonify({"error": "No file part in the request."}), 400
+    if not model: return jsonify({"error": "API service is not configured."}), 500
+    if 'file' not in request.files: return jsonify({"error": "No file part in the request."}), 400
 
     file = request.files['file']
-    if file.filename == '':
-        return jsonify({"error": "No file selected."}), 400
+    if file.filename == '': return jsonify({"error": "No file selected."}), 400
 
     filename = secure_filename(file.filename)
     target_lang = request.form.get('target_lang', 'English')
@@ -125,6 +109,7 @@ def translate_file_handler():
             mem_file.seek(0)
             return send_file(mem_file, as_attachment=True, download_name=f"translated_{filename}", mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
 
+        # Fallback for other file types
         text_to_translate = ""
         if filename.lower().endswith('.pdf'):
             text_to_translate = read_text_from_pdf(file.stream)
@@ -146,12 +131,11 @@ def translate_file_handler():
     except Exception as e:
         print(f"!!!!!! CRITICAL ERROR in translate_file_handler: {e}")
         traceback.print_exc()
-        return jsonify({"error": "An internal server error occurred during file processing."}), 500
+        return jsonify({"error": "An internal server error occurred during processing."}), 500
 
 @app.route('/translate-text', methods=['POST'])
 def translate_text_handler():
-    if not model:
-        return jsonify({"error": "API service is not configured."}), 500
+    if not model: return jsonify({"error": "API service is not configured."}), 500
     data = request.get_json()
     text = data.get('text', '')
     target_lang = data.get('target_lang', 'English')
