@@ -7,21 +7,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const backButtons = document.querySelectorAll('.back-btn');
 
     function openWorkspace(workspaceId) {
-        selectionScreen.classList.add('hidden');
-        fileWorkspace.classList.add('hidden');
-        textWorkspace.classList.add('hidden');
-
+        selectionScreen.style.display = 'none';
+        fileWorkspace.style.display = 'none';
+        textWorkspace.style.display = 'none';
         if (workspaceId === 'file-translation') {
-            fileWorkspace.classList.remove('hidden');
+            fileWorkspace.style.display = 'flex';
         } else {
-            textWorkspace.classList.remove('hidden');
+            textWorkspace.style.display = 'flex';
         }
     }
 
     function showSelectionScreen() {
-        fileWorkspace.classList.add('hidden');
-        textWorkspace.classList.add('hidden');
-        selectionScreen.classList.remove('hidden');
+        fileWorkspace.style.display = 'none';
+        textWorkspace.style.display = 'none';
+        selectionScreen.style.display = 'flex';
     }
 
     openDocButton.addEventListener('click', () => openWorkspace('file-translation'));
@@ -39,12 +38,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const uploadArea = document.getElementById('upload-area');
     const translateFileBtn = document.getElementById('translate-file-btn');
     const downloadReadyBtn = document.getElementById('download-ready-btn');
-    
     const progressContainer = document.getElementById('progress-container');
     const progressBar = document.getElementById('progress-bar');
     const progressText = document.getElementById('progress-text');
     const timeEstimate = document.getElementById('time-estimate');
-
     const sourceTextArea = document.getElementById('source-text');
     const targetTextArea = document.getElementById('target-text');
     const copyBtn = document.getElementById('copy-btn');
@@ -71,6 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let elapsed = 0;
         progressContainer.classList.remove('hidden');
         progressBar.style.width = '0%';
+        progressBar.style.background = '';
         progressText.textContent = `Processing... 0%`;
         timeEstimate.textContent = `~${Math.round(estimatedDuration)}s remaining`;
         progressInterval = setInterval(() => {
@@ -86,6 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function completeProgress() {
         clearInterval(progressInterval);
+        progressContainer.classList.remove('hidden');
         progressBar.style.width = '100%';
         progressText.textContent = 'Success! Ready to Download.';
         timeEstimate.textContent = 'اكتملت المعالجة بنجاح';
@@ -93,6 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     function failProgress(errorMessage) {
         clearInterval(progressInterval);
+        progressContainer.classList.remove('hidden');
         progressBar.style.background = 'var(--amc-orange)';
         progressText.textContent = `Error: ${errorMessage}`;
         timeEstimate.textContent = 'Please try again.';
@@ -197,10 +197,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
     fileForm.addEventListener('submit', handleFileSubmit);
     let debounceTimer;
-    sourceTextArea.addEventListener('input', () => { clearTimeout(debounceTimer); debounceTimer = setTimeout(handleTextTranslation, 500); });
-    copyBtn.addEventListener('click', () => { navigator.clipboard.writeText(targetTextArea.value); });
-    
-    populateLanguageSelectors();
-    
-    showSelectionScreen();
-});
+    sourceTextArea.addEventListener('input', () => { clearTimeout(debounceTimer); debounceTimer = setTimeout(handleTextTr
