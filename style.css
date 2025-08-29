@@ -1,26 +1,21 @@
 /* ================================================================== */
-/* ============= CORPORATE ELEGANCE THEME - V9 FINAL ============== */
+/* ============= CORPORATE ELEGANCE THEME - V10 FINAL ============= */
 /* ================================================================== */
 
 :root {
     --amc-green: #49763a;
     --amc-orange: #e15423;
     --amc-orange-dark: #c34114;
-    
     --bg-light: #f4f7fc;
     --card-bg: #ffffff;
-    
     --text-primary: #1e293b;
     --text-secondary: #64748b;
     --text-light: #f8fafc;
-    
     --border-color: #e2e8f0;
     --accent-green-light: #4ade80;
-    --accent-green-dark: #16a34a; 
-    
+    --accent-green-dark: #16a34a;
     --font-en: 'Poppins', sans-serif;
     --font-ar: 'Cairo', sans-serif;
-    
     --shadow-md: 0 4px 10px rgba(30, 41, 59, 0.05);
     --shadow-lg: 0 10px 30px rgba(30, 41, 59, 0.1);
 }
@@ -147,41 +142,4 @@ select {
 .submit-btn, .download-btn {
     width: 100%; color: white; border: none; padding: 0.9rem; border-radius: 12px;
     font-size: 1rem; font-weight: 600; cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex; align-items: center; justify-content: center; gap: 0.75rem;
-}
-.submit-btn {
-    background: linear-gradient(45deg, var(--amc-orange), var(--amc-orange-dark));
-    box-shadow: 0 4px 15px rgba(225, 84, 35, 0.3);
-}
-.submit-btn:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(225, 84, 35, 0.4); }
-
-.download-btn {
-    background: linear-gradient(45deg, #428b4c, var(--amc-green));
-    box-shadow: 0 4px 15px rgba(73, 118, 58, 0.3);
-}
-.download-btn svg { width: 20px; height: 20px; }
-.download-btn:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(73, 118, 58, 0.4); }
-
-.text-areas { display: flex; gap: 1rem; }
-textarea {
-    flex: 1; height: 200px; padding: 1rem; background: var(--text-light);
-    border: 1px solid var(--border-color); border-radius: 8px;
-    font-size: 1rem; resize: none;
-}
-.target-text-container { position: relative; width: 100%; }
-#copy-btn {
-    position: absolute; bottom: 1rem; right: 1rem; width: 40px; height: 40px;
-    border-radius: 8px; background: #fff; border: 1px solid var(--border-color);
-    cursor: pointer; display: flex; align-items: center; justify-content: center;
-}
-
-.app-footer { text-align: center; margin-top: 2rem; color: var(--text-secondary); font-size: 0.9rem; }
-.hidden { display: none !important; }
-
-@media (max-width: 768px) {
-    body { padding: 1rem; align-items: flex-start; }
-    .app-container { padding: 1.5rem; margin-top: 1rem; }
-    .action-buttons-container { grid-template-columns: 1fr; }
-    .language-selectors, .text-areas { flex-direction: column; }
-}
+    transition: all 
