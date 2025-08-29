@@ -25,7 +25,6 @@ try:
 except Exception as e:
     print(f"!!!!!! FATAL ERROR during Gemini API setup: {e}")
 
-# --- Helper function for making translation calls to the API ---
 def translate_text_api(text_to_translate, target_lang):
     if not text_to_translate or not text_to_translate.strip():
         return ""
@@ -37,18 +36,13 @@ def translate_text_api(text_to_translate, target_lang):
         print(f"--- API translation error for a chunk: {e}")
         return text_to_translate
 
-# --- YOUR PREFERRED DOCX TRANSLATION ENGINE ---
 def translate_docx_in_place(doc: DocxDocument, target_lang: str):
     print("Starting in-place DOCX translation (paragraph by paragraph)...")
-    
-    # 1. Translate Paragraphs
     for para in doc.paragraphs:
         if para.text.strip():
             original_text = para.text
             translated_text = translate_text_api(original_text, target_lang)
             para.text = translated_text
-
-    # 2. Translate Tables
     for table in doc.tables:
         for row in table.rows:
             for cell in row.cells:
@@ -57,11 +51,9 @@ def translate_docx_in_place(doc: DocxDocument, target_lang: str):
                         original_text = para.text
                         translated_text = translate_text_api(original_text, target_lang)
                         para.text = translated_text
-                        
     print("In-place DOCX translation finished.")
     return doc
 
-# --- Other Helper Functions (PDF, PPTX, etc.) ---
 def read_text_from_pdf(stream):
     reader = PyPDF2.PdfReader(stream)
     return '\n'.join([page.extract_text() for page in reader.pages if page.extract_text()])
@@ -84,7 +76,6 @@ def create_docx_from_text(text):
     mem_file.seek(0)
     return mem_file
 
-# --- Flask Routes ---
 @app.route('/')
 def serve_index():
     return app.send_static_file('index.html')
@@ -93,7 +84,6 @@ def serve_index():
 def translate_file_handler():
     if not model: return jsonify({"error": "API service is not configured."}), 500
     if 'file' not in request.files: return jsonify({"error": "No file part in the request."}), 400
-
     file = request.files['file']
     if file.filename == '': return jsonify({"error": "No file selected."}), 400
 
@@ -109,7 +99,6 @@ def translate_file_handler():
             mem_file.seek(0)
             return send_file(mem_file, as_attachment=True, download_name=f"translated_{filename}", mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
 
-        # Fallback for other file types
         text_to_translate = ""
         if filename.lower().endswith('.pdf'):
             text_to_translate = read_text_from_pdf(file.stream)
@@ -145,4 +134,15 @@ def translate_text_handler():
 
 if __name__ == "__main__":
     port = int(os.environ.get('PORT', 8080))
-    app.run(host='0.0.0.0', port=port)
+    app.run(host='0.0.0.0', port=port)```
+
+---
+
+#### الملف الرابع: `index.html` (الهيكل النهائي)
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AMC GlobalTranslate | AI Tran
