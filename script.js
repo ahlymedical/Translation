@@ -3,22 +3,32 @@ document.addEventListener('DOMContentLoaded', () => {
     const selectionScreen = document.getElementById('selection-screen');
     const fileWorkspace = document.getElementById('file-translation');
     const textWorkspace = document.getElementById('text-translation');
+    const openDocButton = document.getElementById('open-doc-workspace');
+    const openTextButton = document.getElementById('open-text-workspace');
+    const backButtons = document.querySelectorAll('.back-btn');
 
-    window.openWorkspace = (workspaceId) => {
+    function openWorkspace(workspaceId) {
         selectionScreen.style.display = 'none';
         if (workspaceId === 'file-translation') {
             fileWorkspace.style.display = 'flex';
         } else {
             textWorkspace.style.display = 'flex';
         }
-    };
+    }
 
-    window.showSelectionScreen = () => {
+    function showSelectionScreen() {
         fileWorkspace.style.display = 'none';
         textWorkspace.style.display = 'none';
         selectionScreen.style.display = 'flex';
-    };
+    }
+
+    openDocButton.addEventListener('click', () => openWorkspace('file-translation'));
+    openTextButton.addEventListener('click', () => openWorkspace('text-translation'));
+    backButtons.forEach(button => {
+        button.addEventListener('click', showSelectionScreen);
+    });
     // --- End of UI State Management ---
+
 
     const FILE_TRANSLATE_URL = '/translate-file';
     const TEXT_TRANSLATE_URL = '/translate-text';
@@ -143,9 +153,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const a = document.createElement('a');
             a.href = downloadUrl;
             
-            // Construct the download name based on the original file
             const nameParts = file.name.split('.');
-            const extension = nameParts.pop();
+            nameParts.pop(); // remove original extension
             const baseName = nameParts.join('.');
             a.download = `translated_${baseName}.docx`;
 
@@ -194,29 +203,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eName => {
-        const uploadArea = document.getElementById('upload-area');
-        if (uploadArea) {
-            uploadArea.addEventListener(eName, e => { e.preventDefault(); e.stopPropagation(); });
-            if (eName === 'dragenter' || eName === 'dragover') {
-                uploadArea.addEventListener(eName, () => uploadArea.classList.add('dragover'));
-            }
-            if (eName === 'dragleave' || eName === 'drop') {
-                uploadArea.addEventListener(eName, () => uploadArea.classList.remove('dragover'));
-            }
-            if (eName === 'drop') {
-                uploadArea.addEventListener(eName, e => {
-                    fileInput.files = e.dataTransfer.files;
-                    fileInput.dispatchEvent(new Event('change'));
-                });
-            }
-        }
+    uploadArea.addEventListener('dragenter', (e) => { e.preventDefault(); e.stopPropagation(); uploadArea.classList.add('dragover'); });
+    uploadArea.addEventListener('dragover', (e) => { e.preventDefault(); e.stopPropagation(); uploadArea.classList.add('dragover'); });
+    uploadArea.addEventListener('dragleave', (e) => { e.preventDefault(); e.stopPropagation(); uploadArea.classList.remove('dragover'); });
+    uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault(); e.stopPropagation();
+        uploadArea.classList.remove('dragover');
+        fileInput.files = e.dataTransfer.files;
+        fileInput.dispatchEvent(new Event('change'));
     });
 
-    if(fileForm) fileForm.addEventListener('submit', handleFileSubmit);
+    fileForm.addEventListener('submit', handleFileSubmit);
     let debounceTimer;
-    if(sourceTextArea) sourceTextArea.addEventListener('input', () => { clearTimeout(debounceTimer); debounceTimer = setTimeout(handleTextTranslation, 500); });
-    if(copyBtn) copyBtn.addEventListener('click', () => { navigator.clipboard.writeText(targetTextArea.value); });
+    sourceTextArea.addEventListener('input', () => { clearTimeout(debounceTimer); debounceTimer = setTimeout(handleTextTranslation, 500); });
+    copyBtn.addEventListener('click', () => { navigator.clipboard.writeText(targetTextArea.value); });
     
     populateLanguageSelectors();
     
