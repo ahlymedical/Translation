@@ -4,8 +4,6 @@ import traceback
 import google.generativeai as genai
 import docx
 from docx.document import Document as DocxDocument
-from docx.text.paragraph import Paragraph
-from docx.table import _Cell
 import PyPDF2
 from PIL import Image
 from pptx import Presentation
@@ -27,13 +25,11 @@ try:
 except Exception as e:
     print(f"!!!!!! FATAL ERROR during Gemini API setup: {e}")
 
-# --- NEW BATCH TRANSLATION LOGIC FOR DOCX ---
 def translate_docx_in_place(doc: DocxDocument, target_lang: str):
     print("Starting efficient in-place DOCX translation...")
     texts_to_translate = []
     elements = []
     
-    # 1. Extract all text fragments and their locations
     for para in doc.paragraphs:
         if para.text.strip():
             texts_to_translate.append(para.text)
@@ -51,7 +47,6 @@ def translate_docx_in_place(doc: DocxDocument, target_lang: str):
         print("No text found in DOCX to translate.")
         return doc
 
-    # 2. Batch translate all fragments in a single API call
     delimiter = "\n<|||>\n"
     full_text = delimiter.join(texts_to_translate)
     
@@ -67,24 +62,20 @@ def translate_docx_in_place(doc: DocxDocument, target_lang: str):
         translated_full_text = response.text
         translated_fragments = translated_full_text.split(delimiter)
         
-        # 3. Inject translated text back into the document
         if len(translated_fragments) == len(elements):
             for i, element in enumerate(elements):
                 element.text = translated_fragments[i].strip()
             print("Successfully injected translations back into DOCX.")
         else:
             print(f"!!!!!! Mismatch Error: Got {len(translated_fragments)} fragments, expected {len(elements)}. Reverting to original text.")
-            # Fallback: if something goes wrong, don't corrupt the file.
-            # This part can be improved with more robust error handling if needed.
             return doc
 
     except Exception as e:
         print(f"!!!!!! API Error during batch translation: {e}")
-        return doc # Return original doc on API failure
+        return doc 
 
     return doc
 
-# --- Other Helper Functions (PDF, PPTX, etc.) ---
 def read_text_from_pdf(stream):
     reader = PyPDF2.PdfReader(stream)
     return '\n'.join([page.extract_text() for page in reader.pages if page.extract_text()])
@@ -107,7 +98,6 @@ def create_docx_from_text(text):
     mem_file.seek(0)
     return mem_file
 
-# --- Flask Routes ---
 @app.route('/')
 def serve_index():
     return app.send_static_file('index.html')
@@ -135,7 +125,6 @@ def translate_file_handler():
             mem_file.seek(0)
             return send_file(mem_file, as_attachment=True, download_name=f"translated_{filename}", mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
 
-        # Fallback for other file types
         text_to_translate = ""
         if filename.lower().endswith('.pdf'):
             text_to_translate = read_text_from_pdf(file.stream)
@@ -161,9 +150,10 @@ def translate_file_handler():
 
 @app.route('/translate-text', methods=['POST'])
 def translate_text_handler():
-    # This endpoint is stable and does not need changes.
+    if not model:
+        return jsonify({"error": "API service is not configured."}), 500
     data = request.get_json()
-    text = data.get('text')
+    text = data.get('text', '')
     target_lang = data.get('target_lang', 'English')
     prompt = f"Translate the following text to {target_lang}:\n\n{text}"
     response = model.generate_content(prompt)
