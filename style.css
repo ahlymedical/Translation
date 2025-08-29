@@ -290,3 +290,5 @@ body {
 #copy-btn { position: absolute; bottom: 12px; right: 12px; background: var(--amc-green); border: none; border-radius: 8px; width: 40px; height: 40px; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: all 0.3s; }
 #copy-btn:hover { background: var(--amc-dark-green); transform: scale(1.1); }
 #copy-btn img { width: 22px; height: 22px; }
+.tab-content.active { display: block; animation: fadeIn 0.5s ease-out; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
