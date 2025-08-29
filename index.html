@@ -3,48 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GlobalTranslate | AI-Powered Translation Suite</title>
+    <title>AMC GlobalTranslate | AI Translation Suite</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Cairo:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-    <div class="background-gradient"></div>
 
     <div class="app-container">
         
         <header class="app-header">
             <img src="https://i.ibb.co/p91wYFv/AMC-LOGO-02.png" alt="AMC Logo" class="logo">
-            <h1><span class="en">GlobalTranslate</span><span class="ar">الترجمة العالمية</span></h1>
-            <p><span class="en">The future of professional translation is here.</span><span class="ar">مستقبل الترجمة الاحترافية بين يديك.</span></p>
         </header>
 
         <main class="app-main">
 
-            <div id="action-buttons" class="action-buttons-container">
-                <button class="action-btn document-btn" onclick="openTab(event, 'file-translation')">
-                    <div class="btn-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M20,2H8A2,2,0,0,0,6,4V16a2,2,0,0,0,2,2H20a2,2,0,0,0,2-2V4A2,2,0,0,0,20,2ZM14.1,15.5H12.9V12.42l-1.6,1.6L10.5,13.2l2-2a.54.54,0,0,1,.76,0l2,2-0.8.82-1.6-1.6ZM4,6H2V20a2,2,0,0,0,2,2H16V20H4Z"></path></svg>
-                    </div>
-                    <div class="btn-text">
-                        <h3><span class="en">Document Translation</span><span class="ar">ترجمة المستندات</span></h3>
-                        <p><span class="en">For Word, PDF, and more</span><span class="ar">للملفات النصية والصور</span></p>
-                    </div>
-                </button>
-                <button class="action-btn instant-btn" onclick="openTab(event, 'text-translation')">
-                    <div class="btn-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M20.67,15.08l-3.39-3.39a1,1,0,0,0-1.41,0l-1.3,1.3a1,1,0,0,0,0,1.41l3.39,3.39a1,1,0,0,0,1.41,0l1.3-1.3A1,1,0,0,0,20.67,15.08ZM8.92,3.33a1,1,0,0,0,0,1.41l1.3,1.3a1,1,0,0,0,1.41,0l3.39-3.39a1,1,0,0,0,0-1.41l-1.3-1.3a1,1,0,0,0-1.41,0Zm1.41,10.34a1,1,0,0,0-1.41,0L2.29,20.29a1,1,0,0,0,0,1.41l.59.59a1,1,0,0,0,1.41,0L10.92,15.7a1,1,0,0,0,0-1.41Z"></path></svg>
-                    </div>
-                    <div class="btn-text">
-                        <h3><span class="en">Automatic Translation</span><span class="ar">الترجمة الفورية</span></h3>
-                        <p><span class="en">For instant text snippets</span><span class="ar">للنصوص والمقتطفات السريعة</span></p>
-                    </div>
-                </button>
+            <!-- ======================= MAIN SELECTION SCREEN ======================= -->
+            <div id="selection-screen" class="selection-container">
+                <div class="title-container">
+                    <h1><span class="en">AMC GlobalTranslate</span><span class="ar">الترجمة العالمية</span></h1>
+                    <p><span class="en">Select a service to begin.</span><span class="ar">اختر الخدمة للبدء.</span></p>
+                </div>
+                <div class="action-buttons-container">
+                    <button class="action-btn" onclick="openWorkspace('file-translation')">
+                        <div class="btn-icon document-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M20,2H8A2,2,0,0,0,6,4V16a2,2,0,0,0,2,2H20a2,2,0,0,0,2-2V4A2,2,0,0,0,20,2ZM14.1,15.5H12.9V12.42l-1.6,1.6L10.5,13.2l2-2a.54.54,0,0,1,.76,0l2,2-0.8.82-1.6-1.6ZM4,6H2V20a2,2,0,0,0,2,2H16V20H4Z"></path></svg>
+                        </div>
+                        <div class="btn-text">
+                            <h3><span class="en">Document Translation</span><span class="ar">ترجمة المستندات</span></h3>
+                        </div>
+                    </button>
+                    <button class="action-btn" onclick="openWorkspace('text-translation')">
+                        <div class="btn-icon instant-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M20.67,15.08l-3.39-3.39a1,1,0,0,0-1.41,0l-1.3,1.3a1,1,0,0,0,0,1.41l3.39,3.39a1,1,0,0,0,1.41,0l1.3-1.3A1,1,0,0,0,20.67,15.08ZM8.92,3.33a1,1,0,0,0,0,1.41l1.3,1.3a1,1,0,0,0,1.41,0l3.39-3.39a1,1,0,0,0,0-1.41l-1.3-1.3a1,1,0,0,0-1.41,0Zm1.41,10.34a1,1,0,0,0-1.41,0L2.29,20.29a1,1,0,0,0,0,1.41l.59.59a1,1,0,0,0,1.41,0L10.92,15.7a1,1,0,0,0,0-1.41Z"></path></svg>
+                        </div>
+                        <div class="btn-text">
+                            <h3><span class="en">Automatic Translation</span><span class="ar">الترجمة الفورية</span></h3>
+                        </div>
+                    </button>
+                </div>
             </div>
 
-            <div id="file-translation" class="tab-content">
+            <!-- ======================= DOCUMENT TRANSLATION WORKSPACE ======================= -->
+            <div id="file-translation" class="workspace">
+                <button class="back-btn" onclick="showSelectionScreen()">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M7.82843 10.9999H20V12.9999H7.82843L13.1924 18.3638L11.7782 19.778L4 11.9999L11.7782 4.22168L13.1924 5.63589L7.82843 10.9999Z"></path></svg>
+                    <span>Back / عودة</span>
+                </button>
+                <h2 class="workspace-title"><span class="en">Document Translation</span><span class="ar">ترجمة المستندات</span></h2>
                 <form id="file-upload-form" class="translation-form">
                     <div class="language-selectors">
                         <select id="file-source-lang" name="source_lang"></select>
@@ -71,7 +78,13 @@
                 </form>
             </div>
 
-            <div id="text-translation" class="tab-content">
+            <!-- ======================= INSTANT TEXT WORKSPACE ======================= -->
+            <div id="text-translation" class="workspace">
+                 <button class="back-btn" onclick="showSelectionScreen()">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M7.82843 10.9999H20V12.9999H7.82843L13.1924 18.3638L11.7782 19.778L4 11.9999L11.7782 4.22168L13.1924 5.63589L7.82843 10.9999Z"></path></svg>
+                    <span>Back / عودة</span>
+                </button>
+                <h2 class="workspace-title"><span class="en">Instant Translation</span><span class="ar">الترجمة الفورية</span></h2>
                 <div class="translation-form">
                      <div class="language-selectors">
                         <select id="text-source-lang"></select>
@@ -89,6 +102,11 @@
                 </div>
             </div>
         </main>
+        
+        <footer class="app-footer">
+             <p>Al Ahly Medical Co. © 2025</p>
+        </footer>
+
     </div>
 
     <script src="script.js"></script>
