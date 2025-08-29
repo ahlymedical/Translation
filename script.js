@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // --- UI State Management ---
     const selectionScreen = document.getElementById('selection-screen');
     const fileWorkspace = document.getElementById('file-translation');
     const textWorkspace = document.getElementById('text-translation');
@@ -30,7 +29,6 @@ document.addEventListener('DOMContentLoaded', () => {
     backButtons.forEach(button => {
         button.addEventListener('click', showSelectionScreen);
     });
-    // --- End of UI State Management ---
 
     const FILE_TRANSLATE_URL = '/translate-file';
     const TEXT_TRANSLATE_URL = '/translate-text';
@@ -55,51 +53,33 @@ document.addEventListener('DOMContentLoaded', () => {
     let translatedFileBlob = null;
     let translatedFileName = '';
 
-    const languages = {
-        'Arabic': 'ar', 'English': 'en', 'French': 'fr', 'German': 'de', 'Spanish': 'es', 
-        'Italian': 'it', 'Portuguese': 'pt', 'Dutch': 'nl', 'Russian': 'ru', 'Turkish': 'tr',
-        'Japanese': 'ja', 'Korean': 'ko', 'Chinese (Simplified)': 'zh-CN', 'Hindi': 'hi',
-        'Indonesian': 'id', 'Polish': 'pl', 'Swedish': 'sv', 'Vietnamese': 'vi'
-    };
+    const languages = { 'Arabic': 'ar', 'English': 'en', 'French': 'fr', 'German': 'de', 'Spanish': 'es', 'Italian': 'it', 'Portuguese': 'pt', 'Dutch': 'nl', 'Russian': 'ru', 'Turkish': 'tr', 'Japanese': 'ja', 'Korean': 'ko', 'Chinese (Simplified)': 'zh-CN', 'Hindi': 'hi', 'Indonesian': 'id', 'Polish': 'pl', 'Swedish': 'sv', 'Vietnamese': 'vi' };
     
     function populateLanguageSelectors() {
-        const selectors = document.querySelectorAll('select');
-        selectors.forEach(selector => {
+        document.querySelectorAll('select').forEach(selector => {
             const isSource = selector.id.includes('source');
             selector.innerHTML = isSource ? '<option value="auto">Auto-Detect</option>' : '';
-            for (const name in languages) { 
-                const option = new Option(name, name);
-                selector.add(option);
-            }
+            for (const name in languages) { selector.add(new Option(name, name)); }
         });
         document.getElementById('file-target-lang').value = 'Arabic';
         document.getElementById('text-target-lang').value = 'Arabic';
     }
     
     function startProgressSimulation(fileSize) {
-        const estimatedDuration = 15 + (fileSize / 1024 / 1024) * 20;
+        const estimatedDuration = 10 + (fileSize / 1024 / 1024) * 15;
         let progress = 0;
         let elapsed = 0;
-
-        progressContainer.style.display = 'block';
+        progressContainer.classList.remove('hidden');
         progressBar.style.width = '0%';
         progressText.textContent = `Processing... 0%`;
         timeEstimate.textContent = `~${Math.round(estimatedDuration)}s remaining`;
-
         progressInterval = setInterval(() => {
             elapsed++;
             progress = Math.min(95, (elapsed / estimatedDuration) * 100);
-            
             progressBar.style.width = `${progress.toFixed(2)}%`;
             progressText.textContent = `Processing... ${Math.round(progress)}%`;
-
             const remaining = Math.round(estimatedDuration - elapsed);
-            if (remaining > 0) {
-                timeEstimate.textContent = `~${remaining}s remaining`;
-            } else {
-                timeEstimate.textContent = 'Finalizing...';
-            }
-
+            timeEstimate.textContent = remaining > 0 ? `~${remaining}s remaining` : 'Finalizing...';
             if (progress >= 95) { clearInterval(progressInterval); }
         }, 1000);
     }
@@ -125,40 +105,32 @@ document.addEventListener('DOMContentLoaded', () => {
         if(enText) enText.textContent = 'Click to upload';
         if(arText) arText.textContent = 'انقر للرفع';
         
-        setTimeout(() => {
-            progressContainer.style.display = 'none';
-            downloadReadyBtn.classList.add('hidden');
-            translateFileBtn.classList.remove('hidden');
-        }, 5000);
+        progressContainer.classList.add('hidden');
+        downloadReadyBtn.classList.add('hidden');
+        translateFileBtn.classList.remove('hidden');
     }
 
     async function handleFileSubmit(e) {
         e.preventDefault();
         if (fileInput.files.length === 0) { alert('Please select a file first.'); return; }
-
         const file = fileInput.files[0];
         const formData = new FormData(fileForm);
         translateFileBtn.disabled = true;
-
         startProgressSimulation(file.size);
-
         try {
             const response = await fetch(FILE_TRANSLATE_URL, { method: 'POST', body: formData });
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+                throw new Error(errorData.error || `Upstream error, please try a smaller file.`);
             }
             completeProgress();
-            
             translatedFileBlob = await response.blob();
             const nameParts = file.name.split('.');
             nameParts.pop();
             const baseName = nameParts.join('.');
             translatedFileName = `translated_${baseName}.docx`;
-
             translateFileBtn.classList.add('hidden');
             downloadReadyBtn.classList.remove('hidden');
-
         } catch (error) {
             failProgress(error.message);
         } finally {
@@ -209,9 +181,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const arText = fileNameDisplay.querySelector('.ar b');
             if(enText) enText.textContent = file.name;
             if(arText) arText.textContent = '';
-            progressContainer.style.display = 'none';
-            downloadReadyBtn.classList.add('hidden');
-            translateFileBtn.classList.remove('hidden');
+            resetFileUI();
         }
     });
 
