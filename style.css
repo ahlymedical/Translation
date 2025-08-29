@@ -1,5 +1,5 @@
 /* ================================================================== */
-/* ============= CORPORATE ELEGANCE THEME - V6 FINAL ============== */
+/* ============= CORPORATE ELEGANCE THEME - V7 FINAL ============== */
 /* ================================================================== */
 
 :root {
@@ -15,12 +15,12 @@
     --text-light: #f8fafc;
     
     --border-color: #e2e8f0;
-    --accent-blue: #3b82f6;
+    --accent-green: #10b981; /* A brighter green for the progress bar */
     
     --font-en: 'Poppins', sans-serif;
     --font-ar: 'Cairo', sans-serif;
     
-    --shadow-md: 0 4px_10px rgba(30, 41, 59, 0.05);
+    --shadow-md: 0 4px 10px rgba(30, 41, 59, 0.05);
     --shadow-lg: 0 10px 30px rgba(30, 41, 59, 0.1);
 }
 
@@ -38,6 +38,19 @@ body {
     padding: 2rem;
 }
 
+/* Bilingual Text Formatting */
+.en, .ar {
+    display: block;
+    line-height: 1.4;
+}
+.ar {
+    font-family: var(--font-ar);
+    font-size: 0.9em;
+    color: var(--text-secondary);
+}
+.title-container .ar { color: var(--amc-green); font-size: 1em; }
+.btn-text .ar, .submit-btn .ar { color: inherit; font-size: 0.9em; }
+
 .app-container {
     width: 100%;
     max-width: 700px;
@@ -54,8 +67,8 @@ body {
 
 .title-container { text-align: center; }
 .title-container h1 { font-size: 2.2rem; font-weight: 700; }
-.title-container .ar { color: var(--amc-green); }
-.title-container p { color: var(--text-secondary); margin-top: 0.5rem; }
+.title-container p { margin-top: 0.5rem; }
+.title-container .en { font-weight: 600; }
 
 .selection-container, .workspace {
     width: 100%;
@@ -102,6 +115,7 @@ body {
 .instant-icon { background: var(--amc-orange); }
 .btn-icon svg { width: 28px; height: 28px; }
 .btn-text h3 { font-size: 1.1rem; font-weight: 600; }
+.btn-text .en { font-weight: 600; }
 
 .back-btn {
     align-self: flex-start;
@@ -119,7 +133,7 @@ body {
 .back-btn svg { width: 20px; height: 20px; }
 
 .workspace-title { margin-bottom: 2rem; text-align: center; }
-.workspace-title .ar { color: var(--amc-green); }
+.workspace-title .en { font-weight: 600; font-size: 1.5rem; }
 
 .translation-form { width: 100%; display: flex; flex-direction: column; gap: 1.5rem; }
 .language-selectors { display: flex; gap: 1rem; }
@@ -160,7 +174,7 @@ select {
 .progress-bar {
     width: 0%;
     height: 100%;
-    background: linear-gradient(90deg, #4ade80, var(--amc-green));
+    background: linear-gradient(90deg, #4ade80, var(--accent-green));
     border-radius: 16px;
     transition: width 0.5s cubic-bezier(0.25, 1, 0.5, 1);
     position: relative;
