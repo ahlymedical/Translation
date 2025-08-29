@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AMC GlobalTranslate | الترجمة العالمية من الأهلي الطبية</title>
+    <title>AMC GlobalTranslate | The Ultimate AI Translator</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -11,107 +11,95 @@
 </head>
 <body>
 
-    <!-- Dynamic Aurora Background Elements -->
     <div class="aurora-background">
         <div class="aurora-shape shape-1"></div>
         <div class="aurora-shape shape-2"></div>
     </div>
 
-    <div class="main-container">
-        <header class="app-header">
-            <img src="https://i.ibb.co/p91wYFv/AMC-LOGO-02.png" alt="AMC Logo" class="logo">
-        </header>
-
-        <main class="app-main">
-            <div class="title-container">
-                <h1><span class="en">AMC GlobalTranslate</span><span class="ar">الترجمة العالمية من الأهلي الطبية</span></h1>
-                <p><span class="en">AI-powered, seamless translation for professional documents.</span><span class="ar">ترجمة احترافية بالذكاء الاصطناعي لمستنداتك الهامة.</span></p>
+    <div class="app-container">
+        <!-- ======================= SIDEBAR (CONTROL PANEL) ======================= -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <img src="https://i.ibb.co/p91wYFv/AMC-LOGO-02.png" alt="AMC Logo" class="logo">
+                <div class="app-title">
+                    <h1>GlobalTranslate</h1>
+                    <p>Powered by AMC</p>
+                </div>
             </div>
-
-            <div class="tabs">
+            
+            <nav class="mode-switcher">
                 <button class="tab-link active" onclick="openTab(event, 'file-translation')">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 6H7.5C6.11929 6 5 7.11929 5 8.5V17.5C5 18.8807 6.11929 20 7.5 20H16.5C17.8807 20 19 18.8807 19 17.5V8.5C19 7.11929 17.8807 6 16.5 6ZM7.5 4C4.94772 4 3 6.01472 3 8.5V17.5C3 20.0523 4.94772 22 7.5 22H16.5C19.0523 22 21 20.0523 21 17.5V8.5C21 6.01472 19.0523 4 16.5 4H7.5ZM13 13H15V15H13V13ZM9 13H11V15H9V13ZM13 9H15V11H13V9ZM9 9H11V11H9V9Z"></path></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="9" y1="15" x2="15" y2="15"></line></svg>
                     <span><span class="en">Document</span> / <span class="ar">المستندات</span></span>
                 </button>
                 <button class="tab-link" onclick="openTab(event, 'text-translation')">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M5 4H19C19.5523 4 20 4.44772 20 5V19C20 19.5523 19.5523 20 19 20H5C4.44772 20 4 19.5523 4 19V5C4 4.44772 4.44772 4 5 4ZM2 5C2 3.34315 3.34315 2 5 2H19C20.6569 2 22 3.34315 22 5V19C22 20.6569 20.6569 22 19 22H5C3.34315 22 2 20.6569 2 19V5ZM13 6H15V11H13V6ZM8 8H10V18H8V8Z"></path></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"></polyline><line x1="9" y1="20" x2="15" y2="20"></line><line x1="12" y1="4" x2="12" y2="20"></line></svg>
                     <span><span class="en">Instant Text</span> / <span class="ar">النص الفوري</span></span>
                 </button>
-            </div>
+            </nav>
+            
+            <footer class="sidebar-footer">
+                <p>Al Ahly Medical Co. © 2025</p>
+            </footer>
+        </aside>
 
-            <!-- File Translation Tab -->
+        <!-- ======================= MAIN CONTENT (WORKSPACE) ======================= -->
+        <main class="main-content">
             <div id="file-translation" class="tab-content active">
+                <div class="workspace-header">
+                    <h2><span class="en">Document Translation</span><span class="ar">ترجمة المستندات</span></h2>
+                    <p><span class="en">Upload your file, and let AI handle the rest with precision.</span><span class="ar">ارفع ملفك، ودع الذكاء الاصطناعي يتولى الباقي بدقة.</span></p>
+                </div>
                 <form id="file-upload-form">
                     <div class="language-selectors">
-                        <div class="select-wrapper">
-                            <select id="file-source-lang" name="source_lang"></select>
-                        </div>
-                        <img src="https://api.iconify.design/solar/transfer-horizontal-bold.svg?color=%2349763a" class="lang-arrow" alt="Translate Arrow">
-                        <div class="select-wrapper">
-                            <select id="file-target-lang" name="target_lang"></select>
-                        </div>
+                        <select id="file-source-lang" name="source_lang"></select>
+                        <svg class="lang-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                        <select id="file-target-lang" name="target_lang"></select>
                     </div>
-
                     <div class="upload-area" id="upload-area">
                         <input type="file" id="file-input" name="file" accept=".docx,.pdf,.png,.jpg,.jpeg,.pptx" hidden>
                         <label for="file-input" class="upload-label">
-                            <div class="upload-icon-wrapper">
-                                <img src="https://api.iconify.design/solar/cloud-upload-bold.svg?color=%2300653e" alt="Upload Icon" class="upload-icon" id="dynamic-upload-icon">
+                            <div id="dynamic-upload-icon" class="upload-icon-wrapper">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
                             </div>
-                            <span id="file-name-display">
-                                <span class="en"><b>Click to upload</b> or drag & drop a file</span>
-                                <span class="ar"><b>انقر للرفع</b> أو قم بسحب وإفلات الملف</span>
+                            <span id="file-name-display" class="upload-text">
+                                <span class="en"><b>Click to upload</b> or drag & drop</span>
+                                <span class="ar"><b>انقر للرفع</b> أو اسحب الملف</span>
                                 <small>(docx, pptx, pdf, png, jpg)</small>
                             </span>
                         </label>
                     </div>
-
                     <div id="progress-container" class="progress-container" style="display: none;">
-                        <div class="progress-info">
-                            <span id="progress-text" class="progress-text">جاري التحميل... 0%</span>
-                            <span id="time-estimate" class="time-estimate">الوقت المتبقي: جاري الحساب...</span>
-                        </div>
-                        <div class="progress-bar-background">
-                            <div id="progress-bar" class="progress-bar"></div>
-                        </div>
+                        <div class="progress-info"><span id="progress-text"></span><span id="time-estimate"></span></div>
+                        <div class="progress-bar-background"><div id="progress-bar"></div></div>
                     </div>
-                    
                     <button type="submit" class="action-btn" id="translate-file-btn">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12.0006 18.26L4.9292 21.0711L6.52246 13.28L0.595917 8.03874L8.47128 7.32703L12.0006 0L15.5299 7.32703L23.4053 8.03874L17.4787 13.28L19.072 21.0711L12.0006 18.26Z"></path></svg>
                         <span><span class="en">Translate & Download</span> / <span class="ar">ترجم وحمّل</span></span>
                     </button>
                 </form>
             </div>
 
-            <!-- Live Text Translation Tab -->
             <div id="text-translation" class="tab-content">
+                 <div class="workspace-header">
+                    <h2><span class="en">Instant Text Translation</span><span class="ar">الترجمة الفورية للنصوص</span></h2>
+                    <p><span class="en">Type or paste text for a real-time, accurate translation.</span><span class="ar">اكتب أو الصق النص للحصول على ترجمة دقيقة وفورية.</span></p>
+                </div>
                  <div class="language-selectors">
-                    <div class="select-wrapper with-button">
-                        <select id="text-source-lang"></select>
-                        <button type="button" id="auto-detect-btn" class="auto-detect-btn" title="Auto-detect language">
-                            <img src="https://api.iconify.design/solar/radar-bold-duotone.svg?color=white" alt="Auto-detect">
-                        </button>
-                    </div>
-                    <img src="https://api.iconify.design/solar/transfer-horizontal-bold.svg?color=%2349763a" class="lang-arrow" alt="Translate Arrow">
-                    <div class="select-wrapper">
-                        <select id="text-target-lang"></select>
-                    </div>
+                    <select id="text-source-lang"></select>
+                    <svg class="lang-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                    <select id="text-target-lang"></select>
                 </div>
                 <div class="text-areas">
                     <textarea id="source-text" placeholder="Enter text... / أدخل النص..."></textarea>
                     <div class="target-text-container">
                         <textarea id="target-text" placeholder="Translation... / الترجمة..." readonly></textarea>
                         <button id="copy-btn" type="button" title="Copy text">
-                            <img src="https://api.iconify.design/solar/copy-bold.svg?color=white" alt="Copy Icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
                         </button>
                     </div>
                 </div>
             </div>
         </main>
-
-        <footer class="app-footer">
-            <p><span class="en">Developed by <b>Al Ahly Medical Company</b></span> | <span class="ar">تم التطوير بواسطة <b>شركة الأهلي للخدمات الطبية</b></span></p>
-        </footer>
     </div>
 
     <script src="script.js"></script>
