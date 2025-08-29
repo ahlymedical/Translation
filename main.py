@@ -1,6 +1,6 @@
 import os
 import io
-import traceback
+import traceback # Import traceback for detailed error logging
 import google.generativeai as genai
 import docx
 import PyPDF2
@@ -22,12 +22,12 @@ try:
         raise ValueError("GEMINI_API_KEY environment variable not set or found.")
     
     genai.configure(api_key=GEMINI_API_KEY)
-    model = genai.GenerativeModel('gemini-1.5-pro-latest')
-    print("✅ Gemini API configured successfully with 1.5 Pro model.")
+    # Using a model that explicitly supports vision capabilities
+    model = genai.GenerativeModel('gemini-1.5-pro-latest') 
+    print("✅ Gemini API configured successfully with gemini-1.5-pro-latest model.")
 except Exception as e:
     api_key_error = str(e)
     print(f"!!!!!! FATAL ERROR during Gemini API setup: {api_key_error}")
-    traceback.print_exc()
 
 # --- Text Extraction Helper Functions ---
 def read_text_from_docx(stream):
@@ -84,43 +84,51 @@ def translate_file_handler():
     try:
         filename = file.filename.lower()
         original_text = ""
-        is_image = False
-        
-        print(f"Processing file: {filename}, Size: {file.content_length} bytes")
-
-        if filename.endswith('.docx'):
-            original_text = read_text_from_docx(file.stream)
-        elif filename.endswith('.pdf'):
-            original_text = read_text_from_pdf(file.stream)
-        elif filename.endswith('.pptx'):
-            original_text = read_text_from_pptx(file.stream)
-        elif filename.endswith(('.png', '.jpg', '.jpeg')):
-            is_image = True
-            image = Image.open(file.stream)
-        else:
-            return jsonify({"error": "Unsupported file type."}), 400
-
         translated_text = ""
         
-        if is_image:
-            print("Performing image-to-text and translation...")
-            prompt = f"Extract all text from this image and provide only its professional translation into {target_lang}."
-            response = model.generate_content([prompt, image])
+        print(f"Processing file: {filename}")
+
+        # --- THIS IS THE MODIFIED AND IMPROVED SECTION ---
+        if filename.endswith(('.png', '.jpg', '.jpeg')):
+            print("Image file detected. Processing with vision model.")
+            image = Image.open(file.stream)
+            
+            # Constructing a more robust multimodal prompt
+            prompt_parts = [
+                f"Your task is to extract any text from the following image and then translate that extracted text professionally into {target_lang}. You must provide ONLY the final translated text and nothing else, no explanations or introductory phrases.",
+                image,
+            ]
+            
+            response = model.generate_content(prompt_parts)
             translated_text = response.text
-        elif original_text and original_text.strip():
-            print(f"Performing text translation from '{source_lang}' to '{target_lang}'...")
+            print("Image translation successful.")
+
+        elif filename.endswith(('.docx', '.pdf', '.pptx')):
+            if filename.endswith('.docx'):
+                original_text = read_text_from_docx(file.stream)
+            elif filename.endswith('.pdf'):
+                original_text = read_text_from_pdf(file.stream)
+            elif filename.endswith('.pptx'):
+                original_text = read_text_from_pptx(file.stream)
+
+            if not original_text or not original_text.strip():
+                print("⚠️ Warning: Could not extract text from document or document is empty.")
+                return jsonify({"error": "Could not extract any text from the document or the file is empty."}), 400
+            
+            print(f"Text extracted from document. Translating from '{source_lang}' to '{target_lang}'...")
             prompt = (
                 f"You are an expert multilingual translator. Translate the following text from '{source_lang}' to '{target_lang}'. "
-                "The translation must be professional, accurate, and maintain the original formatting as much as possible (like paragraphs). "
+                "The translation must be professional, accurate, and maintain the original formatting like paragraphs. "
                 "Provide only the translated text, with no extra commentary.\n\n"
                 f"--- TEXT ---\n{original_text}"
             )
             response = model.generate_content(prompt)
             translated_text = response.text
+            print("Document text translation successful.")
         else:
-             return jsonify({"error": "Could not extract any text from the document or the file is empty."}), 400
+            return jsonify({"error": "Unsupported file type."}), 400
 
-        print("Translation successful. Creating downloadable file.")
+        print("Creating downloadable .docx file.")
         translated_doc_stream = create_docx_from_text(translated_text)
         new_filename = f"translated_{os.path.splitext(file.filename)[0]}.docx"
 
@@ -132,12 +140,16 @@ def translate_file_handler():
         )
 
     except Exception as e:
+        # This will now print the FULL error traceback to your logs
         print(f"!!!!!! An error occurred during file processing for {file.filename}: {e}")
-        traceback.print_exc()
-        return jsonify({"error": "An internal server error occurred during file processing. Please try again later."}), 500
+        detailed_error = traceback.format_exc()
+        print(detailed_error)
+        return jsonify({"error": "An internal server error occurred during file processing. Please check the logs for details."}), 500
+
 
 @app.route('/translate-text', methods=['POST'])
 def translate_text_handler():
+    # This function is working correctly, no changes needed.
     if not model:
         print(f"❌ Error: Translate-text request failed because Gemini model is not initialized. Reason: {api_key_error}")
         return jsonify({"error": f"API service is not configured. Please contact support. Reason: {api_key_error}"}), 500
@@ -165,4 +177,4 @@ def translate_text_handler():
 
 if __name__ == "__main__":
     port = int(os.environ.get('PORT', 8080))
-    app.run(debug=False, host='0.0.0.0', port=port) # Set debug=False for production
+    app.run(debug=False, host='0.0.0.0', port=port)
